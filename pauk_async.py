@@ -8,17 +8,8 @@ import rss_threading
 import bs4_processing
 
 
-
-
 list_of_htmls = []
 
-
-# def get_urls_form_file(file):
-#     with open(file,'r') as f:
-#         lines = f.readlines()
-#         lines = [l.strip() for l in lines]
-#         print(lines)
-#     return lines
 
 @asyncio.coroutine
 def download_from_inet(url,title,rss,func):
@@ -27,7 +18,13 @@ def download_from_inet(url,title,rss,func):
     print('Start downloading {}'.format(url))
     response = yield from asyncio.wait_for(aiohttp.request('GET', url), 10)  # With timeout
     body = yield from response.read_and_close()
-    body = body.decode()
+    try:
+        if rss in ['News-Asia', 'МигНьюс', 'Коммерсант', 'Грузия-онлайн', 'ЦАМТО']:
+            body = body.decode(encoding='cp1251')
+        else:
+            body = body.decode(encoding='utf-8')
+    except Exception as e:
+        print(rss,e,'\n', file=open('errors.txt','a',encoding='utf-8'))
     list_of_htmls.append([body,title,rss,func])
     print('Finished {}'.format(url))
 
@@ -69,10 +66,13 @@ if __name__ == "__main__":
         loop.run_until_complete(aw)
 
         for html_item in list_of_htmls:
-            if html_item[3] == 'lenta':
-                lenta(html_item[0])
-    #         NA_obj = bs4_processing.NEWSAGENCY(html_and_title[1])
-    #         if getattr(NA_obj,func_name)(html_and_title[0]) != False:       # Parse by IA name
+            # if html_item[3] == 'lenta':
+            #     lenta(html_item[0])
+            NA_obj = bs4_processing.NEWSAGENCY(html_item)
+            if getattr(NA_obj,func_name)() != False:       # Parse by IA name
+                NA_obj.strip_texts()
+                print('{}\n{}\n{}\n{}\n\n'.format(html_item[2],NA_obj.zagolovok_class, NA_obj.get_time(),NA_obj.main_text_class),
+                      file=open("result.txt",'a',encoding='utf-8'))
     #             if rss_name == 'Грузия-онлайн':
     #                 NA_obj.encoding_texts(encoding1='cp1252')
     #             else:
@@ -109,4 +109,4 @@ if __name__ == "__main__":
     #
         #
         #
-        # list_of_htmls = []
+        list_of_htmls = []
