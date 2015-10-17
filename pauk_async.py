@@ -18,7 +18,7 @@ def download_from_inet(url,title,rss,func):
     global list_of_htmls
     print('Start downloading {}'.format(url))
     logging.info('Start downloading {}'.format(url))
-    response = yield from asyncio.wait_for(aiohttp.request('GET', url), 50)  # With timeout
+    response = yield from asyncio.wait_for(aiohttp.request('GET', url), 40)  # With timeout
     body = yield from response.read_and_close()
     try:
         if rss in ['News-Asia', 'МигНьюс', 'Коммерсант', 'Грузия-онлайн', 'ЦАМТО']:
@@ -29,7 +29,7 @@ def download_from_inet(url,title,rss,func):
         print(rss,e,'\n', file=open('errors.txt','a',encoding='utf-8'))
     list_of_htmls.append([body,title,rss,func,url])
     try:
-        data_only_urls.remove(url)
+        data_changable.remove((url,title,rss,func))
     except:
         pass
     print('Finished {}'.format(url))
@@ -38,21 +38,22 @@ def download_from_inet(url,title,rss,func):
 
 if __name__ == "__main__":
     start = datetime.now()
-
+    # RSS threading
     pf = rss_threading.PullFeeds()
     pf.pullfeed()
     data = rss_threading.url_selected
-    data_only_urls = [i[0] for i in data]
-    print(len(data))
-    print(data[0])
-    unique_ia = list(set(v[3] for v in data))
-    print(unique_ia)
-    # for func_name in unique_ia:
+    data_current = data[:]
+    data_changable = data[:]
+    # data_only_urls = [i[0] for i in data]
     list_of_htmls = []
-    # selected_by_ia_list = [item for item in data if item[3] == func_name]
-    loop = asyncio.get_event_loop()
-    aw = asyncio.wait([download_from_inet(item[0],item[1],item[2],item[3]) for item in data])
-    loop.run_until_complete(aw)
+
+    for i in range(3):
+        print("ROUND {}".format(i))
+        if data_changable:
+            data_current = data_changable[:]
+            loop = asyncio.get_event_loop()
+            aw = asyncio.wait([download_from_inet(item[0],item[1],item[2],item[3]) for item in data_current])
+            loop.run_until_complete(aw)
 
 
 
@@ -90,5 +91,5 @@ if __name__ == "__main__":
     logging.info('Downloaded: {}'.format(len(list_of_htmls)))
 
     print("LEFT:")
-    for u in data_only_urls:
-        print(u)
+    for u in data_changable:
+        print(u[0])
