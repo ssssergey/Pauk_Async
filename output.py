@@ -4,6 +4,7 @@ import collections
 from datetime import datetime, date
 import os
 
+
 output_folder = 'c:\\от Паука\\'
 if not os.path.exists(output_folder):
     os.makedirs(output_folder)
@@ -74,6 +75,7 @@ def define_country_by_zagolovok(title_a):
             p = re.compile(k_word)
             if p.search(title_a) or p.search(title_a.lower()):
                 country = k[1]
+                return
 
 def define_country_by_mtext(mtext_a):
     global country
@@ -84,6 +86,7 @@ def define_country_by_mtext(mtext_a):
                 country = k[1]
                 mtext_a = mtext_a + '\nРАСПРЕДЕЛЕНО ПО КЛЮЧЕВОМУ СЛОВУ: "{}" В ОСНОВНОМ ТЕКСТЕ.'.format(k_word)
                 return mtext_a
+    return mtext_a
 
 def output_or_not(datetime_format):
     str_date = str(datetime_format.date())
@@ -97,8 +100,8 @@ def output_to_txt(title_a, mtext_a, date_a, time_a,rss_a):
     with open(output_folder + country + ' ' + str(date.today()) + '.txt', 'a', encoding='utf-8') as text_file:
         try:
             text_file.write('{} ({} ИА "{}")\n'.format(date_a,time_a,rss_a))
-            text_file.write(title_a + '\n')
-            text_file.write(mtext_a + '\n\n')
+            text_file.write('{}\n'.format(title_a))
+            text_file.write('{}\n\n'.format(mtext_a))
         except Exception as e:
             print(str(e) + '\n')
 

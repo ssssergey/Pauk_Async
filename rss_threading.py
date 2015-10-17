@@ -5,8 +5,12 @@ import feedparser
 import socket
 import re
 import os
+import logging
 
-socket.setdefaulttimeout(5.0)
+logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
+                    level = logging.INFO, filename='Debugging.txt')
+
+socket.setdefaulttimeout(10.0)
 url_selected = []
 rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://apsny.ge/RSS.xml':'Грузия-онлайн',
@@ -70,24 +74,30 @@ class RssParser(threading.Thread):
 
     def run(self):
         print ("Starting: ", self.name, rss_dict[self.url])
+        count = 0
+        logging.info("Starting: {} {}".format(self.name, rss_dict[self.url]))
         rss_data = feedparser.parse(self.url)
+        logging.info("{}: TOTAL - {}".format(rss_dict[self.url],len(rss_data['entries'])))
         for entry in rss_data.get('entries'):
-            self.add_to_selected_or_not(entry)
+            if self.add_to_selected_or_not(entry):
+                count += 1
             # print (entry.get('title'))
         print ("Exiting: ", self.name, rss_dict[self.url])
+        logging.info("{}: Selected - {}".format(rss_dict[self.url], count))
+        # logging.info("Exiting: {} {}".format(self.name, rss_dict[self.url]))
 
     def add_to_selected_or_not(self, rss_item):
         global url_selected
         rss_item.link = rss_item.link.replace('http://az.apa','http://ru.apa')
         if is_in_history(rss_item) == True:
-            return
+            return False
         stop_words = ['боксер','боксёр','хоккеист','Бессмертн','Звездные войны','Звездных войн','Войнов','Путин',
                       'велик[а-я]{2} отечествен','втор[а-я]{2} миров']
         for word in stop_words:
             p = re.compile(word)
             if p.search(rss_item.title.lower()) or p.search(rss_item.title):
                 # print(rss_item.title, file=open("корзина.txt",'a',encoding='utf-8'))
-                return
+                return False
         keywords_text = keywords_extract()
         for word in keywords_text:  # перебираем ключевые слова
             p = re.compile(word)
@@ -97,7 +107,7 @@ class RssParser(threading.Thread):
                                     rss_item.title,                      # title of article
                                     rss_dict[self.url],                  # IA name
                                     rss_func_dict[rss_dict[self.url]])) # func name
-                return
+                return True
 
 
 def keywords_extract():
@@ -108,10 +118,9 @@ def keywords_extract():
 
 def is_in_history(rss_item):
     if not os.path.isfile('history.txt'): create_history_file() # если файла нет, добавляем его и вписываем лимит-счетчик
-    history_txt = open('history.txt', 'r')  # открываем файл с уникальными url
-    history_txt.seek(0)                     # переводим курсор в начало файла
-    history_list = history_txt.readlines()  # копируем оттуда весь текст
-    history_txt.close()                     #закрываем его
+    with open('history.txt', 'r') as history_txt: # открываем файл с уникальными url
+        history_txt.seek(0)                     # переводим курсор в начало файла
+        history_list = history_txt.readlines()  # копируем оттуда весь текст
     if any(rss_item.link in line for line in history_list):  #преверяем наличие текущей статьи в файле history.txt. Если есть то пропускаем.
         return True
     try:
@@ -122,9 +131,8 @@ def is_in_history(rss_item):
     return False
 
 def create_history_file():
-    history_txt = open('history.txt', 'w+')
-    history_txt.write('0b1100100\n')
-    history_txt.close()
+    with open('history.txt', 'w+') as history_txt:
+        history_txt.write('0b1100100\n')
 
 if __name__ == '__main__':
     pf = PullFeeds()
