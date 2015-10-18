@@ -12,10 +12,20 @@ import logging
 
 logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                     level = logging.INFO, filename='Debugging.txt')
+data_changable = []
+list_of_htmls = []
+
+def get_rss_data():
+    # RSS threading
+    pf = rss_threading.PullFeeds()
+    pf.pullfeed()
+    data = rss_threading.url_selected
+    return data
 
 @asyncio.coroutine
-def download_from_inet(url,title,rss,func):
+def download_HTMLs_to_HTMLlist(url,title,rss,func):
     global list_of_htmls
+    global data_changable
     print('Start downloading {}'.format(url))
     logging.info('Start downloading {}'.format(url))
     response = yield from asyncio.wait_for(aiohttp.request('GET', url), 40)  # With timeout
@@ -35,28 +45,19 @@ def download_from_inet(url,title,rss,func):
     print('Finished {}'.format(url))
     logging.info('Finished {}'.format(url))
 
-
-if __name__ == "__main__":
-    start = datetime.now()
-    # RSS threading
-    pf = rss_threading.PullFeeds()
-    pf.pullfeed()
-    data = rss_threading.url_selected
+def start_async(data):
+    global data_changable
     data_current = data[:]
     data_changable = data[:]
-    # data_only_urls = [i[0] for i in data]
-    list_of_htmls = []
-
     for i in range(3):
         print("ROUND {}".format(i))
         if data_changable:
             data_current = data_changable[:]
             loop = asyncio.get_event_loop()
-            aw = asyncio.wait([download_from_inet(item[0],item[1],item[2],item[3]) for item in data_current])
+            aw = asyncio.wait([download_HTMLs_to_HTMLlist(item[0],item[1],item[2],item[3]) for item in data_current])
             loop.run_until_complete(aw)
 
-
-
+def bs4_and_output():
     for html_item in list_of_htmls:
         NA_obj = bs4_processing.NEWSAGENCY(html_item)
         if getattr(NA_obj,html_item[3])() != False:       # Parse by IA name
@@ -79,17 +80,31 @@ if __name__ == "__main__":
                     for p in patterns:
                         p = "({})".format(p)
                         maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
-
                 output.output_to_txt(title_a, maintext_a, date_a, time_a,rss_a)
+
+def main():
+    start = datetime.now()
+
+    global list_of_htmls
+    list_of_htmls = []
+    data = get_rss_data()
+    start_async(data)
+    bs4_and_output()
+
     end = datetime.now()
     delta = end - start
+
     print('Timing: {}'.format(delta))
     logging.info('Timing: {}'.format(delta))
     print('Total: {}'.format(len(data)))
     logging.info('Total: {}'.format(len(data)))
     print('Downloaded: {}'.format(len(list_of_htmls)))
     logging.info('Downloaded: {}'.format(len(list_of_htmls)))
-
     print("LEFT:")
     for u in data_changable:
         print(u[0])
+
+
+
+if __name__ == "__main__":
+    main()
