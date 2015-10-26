@@ -49,6 +49,8 @@ def download_HTMLs_to_HTMLlist(url,title,rss,func):
         pass
     print('Finished {}'.format(url))
     logging.info('Finished {}'.format(url))
+    app.label_status.configure(text='Осталось скачать статей: {}'.format(len(data_changable)), bg='#69969C')
+    root.update()
 
 def start_async():
     global data_changable
@@ -63,7 +65,11 @@ def start_async():
             loop.run_until_complete(aw)
 
 def bs4_and_output():
+    count = len(list_of_htmls)
     for html_item in list_of_htmls:
+        count -= 1
+        app.label_status.configure(text='Осталось обработать: {}'.format(count), bg='#69969C')
+        root.update()
         NA_obj = bs4_processing.NEWSAGENCY(html_item)
         if getattr(NA_obj,html_item[3])() != False:       # Parse by IA name
             output.add_url_to_history(html_item[4])
@@ -97,6 +103,7 @@ def main():
         app.label_status.configure(text="Обновите программу!", bg='red')
         return
     start = datetime.now()      # START TIME
+    total_len = 0
     for i in range(2):
         global list_of_htmls
         list_of_htmls = []
@@ -111,6 +118,7 @@ def main():
         bs4_and_output()
         total = len(rss_threading.url_selected)
         downloaded = len(list_of_htmls)
+        total_len += downloaded
         print('Total: {}'.format(total))
         logging.info('Total: {}'.format(total))
         print('Downloaded: {}'.format(downloaded))
@@ -131,6 +139,7 @@ def main():
     logging.info('Timing: {}'.format(delta))
 
     summary_text = 'Скачивание завершено.\nНажмите ОТСЕЧКУ и забирайте папку!'
+    summary_text += '\nCкачано статей: {}'.format(total_len)
     summary_text += '\nЗатрачено времени: {}'.format(delta)
     app.label_status.configure(text=summary_text, bg='green')
     root.update()

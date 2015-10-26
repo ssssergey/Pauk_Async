@@ -85,7 +85,7 @@ class RssParser(threading.Thread):
         count = 0
         logging.info("Starting: {} {}".format(self.name, rss_dict[self.url]))
         rss_data = feedparser.parse(self.url)
-        if rss_data:
+        if len(rss_data['entries']):
             logging.info("{}: TOTAL - {}".format(rss_dict[self.url],len(rss_data['entries'])))
             for entry in rss_data.get('entries'):
                 if self.add_to_selected_or_not(entry):
