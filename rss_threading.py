@@ -7,11 +7,13 @@ import re
 import os
 import logging
 
+
 logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                     level = logging.INFO, filename='Debugging.txt')
 
 socket.setdefaulttimeout(10.0)
 url_selected = []
+rss_current = []
 rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://apsny.ge/RSS.xml':'Грузия-онлайн',
         'http://itar-tass.com/rss/v2.xml':'ИТАР-ТАСС',
@@ -55,8 +57,9 @@ rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kav
 class PullFeeds:
     def __init__(self):
         self.data = [k for k in rss_dict.keys()]
-
     def pullfeed(self):
+        global rss_current
+        rss_current = []
         threads = []
         for url in self.data:
              t = RssParser(url)
@@ -65,25 +68,35 @@ class PullFeeds:
              thread.start()
         for thread in threads:
              thread.join()
+        if rss_current:
+            msg = "FAILED RSS:\n"
+            for r in rss_current:
+                msg += r+'\n'
+            logging.info(msg)
 
 class RssParser(threading.Thread):
-
     def __init__(self, url):
         threading.Thread.__init__(self)
         self.url = url
-
     def run(self):
+        global rss_current
         print ("Starting: ", self.name, rss_dict[self.url])
+        rss_current.append(self.name)
         count = 0
         logging.info("Starting: {} {}".format(self.name, rss_dict[self.url]))
         rss_data = feedparser.parse(self.url)
-        logging.info("{}: TOTAL - {}".format(rss_dict[self.url],len(rss_data['entries'])))
-        for entry in rss_data.get('entries'):
-            if self.add_to_selected_or_not(entry):
-                count += 1
-            # print (entry.get('title'))
-        print ("Exiting: ", self.name, rss_dict[self.url])
-        logging.info("{}: Selected - {}".format(rss_dict[self.url], count))
+        if rss_data:
+            logging.info("{}: TOTAL - {}".format(rss_dict[self.url],len(rss_data['entries'])))
+            for entry in rss_data.get('entries'):
+                if self.add_to_selected_or_not(entry):
+                    count += 1
+                # print (entry.get('title'))
+            print ("Exiting: ", self.name, rss_dict[self.url])
+            rss_current.remove(self.name)
+            print ("Осталось: {}".format(len(rss_current)))
+            logging.info("{}: Selected - {}".format(rss_dict[self.url], count))
+        else:
+            logging.info("{}: FAILED!!!".format(rss_dict[self.url]))
         # logging.info("Exiting: {} {}".format(self.name, rss_dict[self.url]))
 
     def add_to_selected_or_not(self, rss_item):
