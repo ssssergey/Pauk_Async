@@ -138,11 +138,18 @@ def main():
     print('Timing: {}'.format(delta))
     logging.info('Timing: {}'.format(delta))
 
-    summary_text = 'Скачивание завершено.\nНажмите ОТСЕЧКУ и забирайте папку!'
-    summary_text += '\nCкачано статей: {}'.format(total_len)
+    if total_len:
+        otsechka()
+        summary_text = 'Готово! Забирайте папку!'
+        summary_text += '\nCкачано статей: {}'.format(total_len)
+        color = 'yellow'
+    else:
+        summary_text = 'Статей, представляющих интерес, не добыто.'
+        color = 'gray'
     summary_text += '\nЗатрачено времени: {}'.format(delta)
-    app.label_status.configure(text=summary_text, bg='green')
+    app.label_status.configure(text=summary_text, bg=color)
     root.update()
+
 
 def otsechka():
     second_path = output.output_folder + "от_Паука_на_" + str(datetime.now().strftime("%H.%M %d.%m.%Y")) + "\\"
@@ -159,19 +166,18 @@ def otsechka():
 
 class GUI():
     def __init__(self, root):
-        root.title("ПАУК Lite " + version)
+        root.title("ПАУК Next " + version)
         # root.iconbitmap("Icon.ico")
         # All Frames
         self.button_start = tk.Button(root, text="ПУСК", font=("Arial 15 bold"), bg='#012E34', fg='white',
                                       command=main)
         self.button_start.pack(fill=X)
-        # self.button_start.grid(row=0, column=0, padx=5, pady=1)
-        self.label_status = tk.Label(root, text="Нажмите ПУСК", bg='#69969C')
+        self.label_status = tk.Label(root, text="Нажмите ПУСК", font=("Arial 12"), bg='#69969C')
         self.label_status.pack(fill=X)
-        # self.label_status.grid(row=1, column=0, padx=1, pady=1, sticky="e")
-        self.button_otsechka = tk.Button(root, text="ОТСЕЧКА", font=("Arial 12 bold"), bg='#427A82', command=otsechka)
-        self.button_otsechka.pack(fill=X)
-
+        # self.button_otsechka = tk.Button(root, text="ОТСЕЧКА", font=("Arial 12 bold"), bg='#427A82', command=otsechka)
+        # self.button_otsechka.pack(fill=X)
+        separator1 = tk.Frame(root, height=5, bg='#0E464E', bd=3)
+        separator1.pack(fill=X)
         self.label_author = tk.Label(root, text='Версия: {} - 2015 г.\nРазработчик: Ли С.Е.'.format(version), bg='#69969C')
         self.label_author.pack(fill=X)
 
