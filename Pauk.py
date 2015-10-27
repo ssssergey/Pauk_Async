@@ -66,32 +66,40 @@ def start_async():
 
 def bs4_and_output():
     count = len(list_of_htmls)
+    recieved = 0
     for html_item in list_of_htmls:
         count -= 1
         app.label_status.configure(text='Осталось обработать: {}'.format(count), bg='#69969C')
         root.update()
         NA_obj = bs4_processing.NEWSAGENCY(html_item)
-        if getattr(NA_obj,html_item[3])() != False:       # Parse by IA name
+        func_result = getattr(NA_obj,html_item[3])()
+        if func_result != False:       # Parse by IA name
             output.add_url_to_history(html_item[4])
-            NA_obj.strip_texts()
-            rss_a = html_item[2]
-            title_a = NA_obj.zagolovok_class
-            date_a,time_a = NA_obj.get_time()
-            maintext_a = NA_obj.main_text_class
+            if func_result != 'no_interest':
+                NA_obj.strip_texts()
+                rss_a = html_item[2]
+                title_a = NA_obj.zagolovok_class
+                date_a,time_a = NA_obj.get_time()
+                maintext_a = NA_obj.main_text_class
 
-            output.country = "Другие"
-            output.define_country_by_zagolovok(title_a)
-            if output.country == "Другие":
-                maintext_a = output.define_country_by_mtext(maintext_a)
-            if output.output_or_not(NA_obj.datetime_format) == True:
-                if output.country == 'Украина' and (rss_a == 'УНИАН' or rss_a == 'Корреспондент' or
-                                                    rss_a == 'РБК-Украина' or rss_a == 'Укринформ' or
-                                                    rss_a == 'BlackSeaNews'):
-                    patterns = ("[\w-]*террорист[а-я]*","боевик[а-я]*","сепаратист[а-я]*","самопровозглаш[а-я]*","оккупант[а-я]*","бандформирован[а-я]*")
-                    for p in patterns:
-                        p = "({})".format(p)
-                        maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
-                output.output_to_txt(title_a, maintext_a, date_a, time_a,rss_a)
+                output.country = "Другие"
+                output.define_country_by_zagolovok(title_a)
+                if output.country == "Другие":
+                    maintext_a = output.define_country_by_mtext(maintext_a)
+                if output.output_or_not(NA_obj.datetime_format) == True:
+                    recieved += 1
+                    if output.country == 'Украина' and (rss_a == 'УНИАН' or rss_a == 'Корреспондент' or
+                                                        rss_a == 'РБК-Украина' or rss_a == 'Укринформ' or
+                                                        rss_a == 'BlackSeaNews'):
+                        patterns = ("[\w-]*террорист[а-я]*","боевик[а-я]*","сепаратист[а-я]*","самопровозглаш[а-я]*","оккупант[а-я]*","бандформирован[а-я]*")
+                        for p in patterns:
+                            p = "({})".format(p)
+                            maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
+                    try:
+                        output.output_to_word(title_a, maintext_a, date_a, time_a,rss_a)
+                    except Exception as e:
+                        output.output_to_txt(title_a, maintext_a, date_a, time_a,rss_a)
+    return recieved
 
 def check_license():
     if date.today() > expire_date:
@@ -104,33 +112,32 @@ def main():
         return
     start = datetime.now()      # START TIME
     total_len = 0
-    for i in range(2):
-        global list_of_htmls
-        list_of_htmls = []
-        app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
-        root.update()
-        get_rss_data()
-        app.label_status.configure(text='Начал скачивать СТАТЬИ.\nОЖИДАЙТЕ...')
-        root.update()
-        start_async()
-        app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
-        root.update()
-        bs4_and_output()
-        total = len(rss_threading.url_selected)
-        downloaded = len(list_of_htmls)
-        total_len += downloaded
-        print('Total: {}'.format(total))
-        logging.info('Total: {}'.format(total))
-        print('Downloaded: {}'.format(downloaded))
-        logging.info('Downloaded: {}'.format(downloaded))
-        print("LEFT:")
-        bad_url = ""
-        for u in data_changable:
-            bad_url += '\n' + u[0]
-            print(u[0])
-        logging.info('Не скачаны следующие статьи:{}'.format(bad_url))
-        if not rss_threading.rss_current:
-            break
+
+    global list_of_htmls
+    list_of_htmls = []
+    app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
+    root.update()
+    get_rss_data()
+    app.label_status.configure(text='Начал скачивать СТАТЬИ.\nОЖИДАЙТЕ...')
+    root.update()
+    start_async()
+    app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
+    root.update()
+    recieved = bs4_and_output()
+    total = len(rss_threading.url_selected)
+    downloaded = len(list_of_htmls)
+    total_len += downloaded
+    print('Total: {}'.format(total))
+    logging.info('Total: {}'.format(total))
+    print('Downloaded: {}'.format(downloaded))
+    logging.info('Downloaded: {}'.format(downloaded))
+    print("LEFT:")
+    bad_url = ""
+    for u in data_changable:
+        bad_url += '\n' + u[0]
+        print(u[0])
+    logging.info('Не скачаны следующие статьи:{}'.format(bad_url))
+
     end = datetime.now()        # STOP TIME
     delta = end - start
     delta = '{} сек.'.format(delta.seconds)
@@ -138,13 +145,14 @@ def main():
     print('Timing: {}'.format(delta))
     logging.info('Timing: {}'.format(delta))
 
-    if total_len:
+    if recieved:
         otsechka()
         summary_text = 'Готово! Забирайте папку!'
         summary_text += '\nCкачано статей: {}'.format(total_len)
+        summary_text += '\nИспользовано: {}'.format(recieved)
         color = 'yellow'
     else:
-        summary_text = 'Статей, представляющих интерес, не добыто.'
+        summary_text = 'Статей, представляющих интерес, не отмечено.'
         color = 'gray'
     summary_text += '\nЗатрачено времени: {}'.format(delta)
     app.label_status.configure(text=summary_text, bg=color)
@@ -166,7 +174,7 @@ def otsechka():
 
 class GUI():
     def __init__(self, root):
-        root.title("ПАУК Next " + version)
+        root.title("ПАУК " + version)
         # root.iconbitmap("Icon.ico")
         # All Frames
         self.button_start = tk.Button(root, text="ПУСК", font=("Arial 15 bold"), bg='#012E34', fg='white',
@@ -184,7 +192,7 @@ class GUI():
 if __name__ == "__main__":
 
     # Tkinter
-    version = '1.0'
+    version = '3.0'
     root = tk.Tk()
     app = GUI(root)
 

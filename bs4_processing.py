@@ -22,7 +22,7 @@ class NEWSAGENCY():
     def get_time(self):
         # raw_vremya_to_list_vremya
         self.vremya_class = self.vremya_class.replace(":", " ").replace(".", " ").replace(",","").replace("/"," ").\
-            replace(" | "," ").replace(" - "," ").replace("\xa0"," ").replace("[","").replace("]","")
+            replace(" | "," ").replace(" - "," ").replace("\xa0"," ").replace("[","").replace("]","").replace("-"," ")
         self.vremya_class = [line.strip() for line in self.vremya_class.split(' ') if line.strip()]
         print (self.vremya_class)
         if not self.vremya_class:
@@ -189,12 +189,12 @@ class NEWSAGENCY():
                 yyy = self.vremya_class[2]
                 HHH = self.vremya_class[3]
                 MMM = self.vremya_class[4]
-            elif self.rss_name == "Ведомости":
-                ddd = self.vremya_class[0].rjust(2,'0')
+            elif self.rss_name == "Ведомости":      # 2015-10-26 22:39:38 +0300
+                ddd = self.vremya_class[2].rjust(2,'0')
                 mmm = self.vremya_class[1]
-                yyy = '20{}'.format(self.vremya_class[2])
-                # HHH = self.vremya_class[3]
-                # MMM = self.vremya_class[4]
+                yyy = self.vremya_class[0]
+                HHH = self.vremya_class[3]
+                MMM = self.vremya_class[4]
             elif self.rss_name == "APA.AZ":          # 02 Октября 2015 / 20:23
                 ddd = self.vremya_class[0].rjust(2,'0')
                 mmm = month_dict[self.vremya_class[1].lower()]
@@ -458,7 +458,9 @@ class NEWSAGENCY():
         return 'Ok'
     def vedomosti(self):
         try:
-            self.vremya_class = self.soup.find('span', {'class': 'b-news-item__time b-news-item__time_one'}).text
+            # self.vremya_class = self.soup.find('span', {'class': 'b-news-item__time b-news-item__time_one'}).text
+            self.vremya_class = self.soup.find('time', {'class': 'b-news-item__time b-news-item__time_one'})
+            self.vremya_class = self.vremya_class['pubdate']
         except Exception as e:
             logging.warning('%%%%%В {} не найдено self.vremya_class.\n'.format(self.rss_name))
             self.vremya_class = 'Empty'
@@ -555,15 +557,15 @@ class NEWSAGENCY():
             self.vremya_class = 'Empty'
         try:
             self.main_text_class = ''
-            mat_cont = self.soup.find('div', {'id': 'mat_cont'})
-            for everyitem in mat_cont.find('article').findAll('p'):
+            # mat_cont = self.soup.find('div', {'id': 'mat_cont'})
+            for everyitem in self.soup.find('article').findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
-            if not self.main_text_class:
-                print("Росбалт: Вариатн 2")
-                self.main_text_class = mat_cont.find('article').text
-                print(self.main_text_class)
-            else:
-                print("Росбалт: Вариатн 1")
+            # if not self.main_text_class:
+            #     print("Росбалт: Вариатн 2")
+            #     self.main_text_class = mat_cont.find('article').text
+            #     print(self.main_text_class)
+            # else:
+            #     print("Росбалт: Вариатн 1")
         except Exception as e:
             logging.warning('%%%%%В {} не найдено self.main_text_class.\n'.format(self.rss_name))
             return False

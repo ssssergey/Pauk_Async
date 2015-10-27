@@ -13,7 +13,7 @@ logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(l
 
 socket.setdefaulttimeout(10.0)
 url_selected = []
-rss_current = []
+rss_current_last = []
 rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://apsny.ge/RSS.xml':'Грузия-онлайн',
         'http://itar-tass.com/rss/v2.xml':'ИТАР-ТАСС',
@@ -58,19 +58,25 @@ class PullFeeds:
     def __init__(self):
         self.data = [k for k in rss_dict.keys()]
     def pullfeed(self):
-        global rss_current
-        rss_current = []
+        global rss_current_last
+        rss_current_last = []
         threads = []
-        for url in self.data:
-             t = RssParser(url)
-             threads.append(t)
-        for thread in threads:
-             thread.start()
-        for thread in threads:
-             thread.join()
-        if rss_current:
+        for i in range(2):
+            for url in self.data:
+                 t = RssParser(url)
+                 threads.append(t)
+            for thread in threads:
+                 thread.start()
+            for thread in threads:
+                 thread.join()
+            if not rss_current_last:
+                break
+            self.data = rss_current_last
+            threads = []
+            logging.info('!!!RSS second ROUND!!!')
+        if rss_current_last:
             msg = "FAILED RSS:\n"
-            for r in rss_current:
+            for r in rss_current_last:
                 msg += r+'\n'
             logging.info(msg)
 
@@ -79,9 +85,9 @@ class RssParser(threading.Thread):
         threading.Thread.__init__(self)
         self.url = url
     def run(self):
-        global rss_current
+        global rss_current_last
         print ("Starting: ", self.name, rss_dict[self.url])
-        rss_current.append(self.name)
+        rss_current_last.append(self.url)
         count = 0
         logging.info("Starting: {} {}".format(self.name, rss_dict[self.url]))
         rss_data = feedparser.parse(self.url)
@@ -92,8 +98,8 @@ class RssParser(threading.Thread):
                     count += 1
                 # print (entry.get('title'))
             print ("Exiting: ", self.name, rss_dict[self.url])
-            rss_current.remove(self.name)
-            print ("Осталось: {}".format(len(rss_current)))
+            rss_current_last.remove(self.url)
+            print ("Осталось: {}".format(len(rss_current_last)))
             logging.info("{}: Selected - {}".format(rss_dict[self.url], count))
         else:
             logging.info("{}: FAILED!!!".format(rss_dict[self.url]))
