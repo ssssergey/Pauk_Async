@@ -126,7 +126,9 @@ class RssParser(threading.Thread):
                 url_selected.append((rss_item.link,                      # link
                                     rss_item.title,                      # title of article
                                     rss_dict[self.url],                  # IA name
-                                    rss_func_dict[rss_dict[self.url]])) # func name
+                                    rss_func_dict[rss_dict[self.url]],   # func name
+                                    rss_item.published_parsed             # time
+                                     ))
                 return True
 
 
