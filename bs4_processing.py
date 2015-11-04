@@ -560,10 +560,10 @@ class NEWSAGENCY():
             # mat_cont = self.soup.find('div', {'id': 'mat_cont'})
             for everyitem in self.soup.find('article').findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
-            # if not self.main_text_class:
-            #     print("Росбалт: Вариатн 2")
-            #     self.main_text_class = mat_cont.find('article').text
-            #     print(self.main_text_class)
+            if not self.main_text_class:
+                # print("Росбалт: Вариатн 2")
+                self.main_text_class = self.soup.find('article').text
+                print(self.main_text_class)
             # else:
             #     print("Росбалт: Вариатн 1")
         except Exception as e:
