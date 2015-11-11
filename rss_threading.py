@@ -39,7 +39,7 @@ rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://www.fergananews.com/rss.php':'Фергана',
         'http://ru.apa.az/rss':'APA.AZ',
         'http://static.feed.rbc.ru/rbc/internal/rss.rbc.ru/rbc.ru/mainnews.rss':'РБК',
-        'http://newsgeorgia.ru/export/rss2/index.xml':'Новости-Грузия',
+        'http://newsgeorgia.ru/export/rss2/index.xml':'Спутник',
         'http://irna.ir//ru/rss.aspx?kind=701':'ИРНА',
         'http://russian.rt.com/rss/':'RussiaToday',
         'http://www.apsnypress.info/news/rss/':'Апсны-Пресс',
@@ -50,7 +50,7 @@ rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kav
                  'МигНьюс':'mignews', 'Коммерсант':'kommersant', 'Ведомости':'vedomosti', 'Фергана':'fergana',
                  'Грузия-онлайн':'georgiaonline', 'BlackSeaNews':'blacksea', 'ЦАМТО':'camto', 'ИТАР-ТАСС':'itartass',
                  'Росбалт':'rosbalt', 'Би-Би-Си':'bbc', 'РБК-Украина':'rbc_ukr', 'Укринформ':'ukrinform', 'РИА-Новости':'rian',
-                 'УНИАН':'unian', 'Корреспондент':'korrespondent','РБК':'rbc_rus','APA.AZ':'apa_az','Новости-Грузия':'newsgeorgia',
+                 'УНИАН':'unian', 'Корреспондент':'korrespondent','РБК':'rbc_rus','APA.AZ':'apa_az','Спутник':'newsgeorgia',
                  'ИРНА':'irna','RussiaToday':'rustoday','Апсны-Пресс':'apsnypress','САНА':'sana'}
 
 
@@ -72,12 +72,14 @@ class PullFeeds:
             if not rss_current_rest:
                 break
             self.data = rss_current_rest
+            if i == 1:
+                rss_current_rest = []
             threads = []
             logging.info('!!!RSS second ROUND!!!')
         if rss_current_rest:
             msg = "FAILED RSS:\n"
             for r in rss_current_rest:
-                msg += r+'\n'
+                msg += rss_dict[r] + '\n'
             logging.info(msg)
 
 class RssParser(threading.Thread):

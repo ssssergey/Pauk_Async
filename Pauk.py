@@ -1,5 +1,8 @@
-__author__ = 'Asus'
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
+__author__ = 'Asus'
+# TODO: Вынести фильтрацию по ключемым словам в файл Pauk
 from datetime import datetime, date, timedelta
 import asyncio
 import aiohttp
@@ -26,22 +29,24 @@ def get_rss_data():
     pf = rss_threading.PullFeeds()
     pf.pullfeed()
 
-GMT_offsets = 3
 def today_filter(url_selected):
     today_url_selected = []
     for i in url_selected:
         old_time = i[4]
         new_time = datetime(old_time.tm_year, old_time.tm_mon, old_time.tm_mday, old_time.tm_hour,old_time.tm_min,
                             old_time.tm_sec)
-        new_time = new_time + timedelta(hours=3)
+        if i[2] == 'ИРНА':
+            new_time = new_time - timedelta(hours=0.5)
+        elif i[2] == 'Спутник':
+            new_time = new_time + timedelta(hours=2)
+        else:
+            new_time = new_time + timedelta(hours=3)
         if new_time.day == date.today().day:
             today_url_selected.append((i[0],i[1],i[2],i[3],new_time))
+        else:
+            output.add_url_to_history(i[0])
     print("Было: {}, Стало: {}".format(len(url_selected), len(today_url_selected)))
     return today_url_selected
-
-def test():
-    get_rss_data()
-    today_filter(rss_threading.url_selected)
 
 class Async():
     def __init__(self, url_selected):
@@ -81,7 +86,7 @@ class Async():
                 aw = asyncio.wait([self.download_HTMLs_to_HTMLlist(item[0],item[1],item[2],item[3],item[4])
                                    for item in self.data_current])
                 loop.run_until_complete(aw)
-        return self.final_list_of_articles
+        return self.final_list_of_articles      # body,title,rss,func,url,atime
 
 def bs4_and_output(final_list_of_articles):
     count = len(final_list_of_articles)
@@ -144,7 +149,7 @@ def main():
     final_list = async_instance.start_async()
     app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
     root.update()
-    recieved = bs4_and_output(final_list)
+    recieved = bs4_and_output(final_list)       # body,title,rss,func,url,atime
     total = len(rss_threading.url_selected)
     downloaded = len(async_instance.final_list_of_articles)
     total_len += downloaded
@@ -156,7 +161,6 @@ def main():
     bad_url = ""
     for u in async_instance.data_changable:
         bad_url += '\n' + u[0]
-        print(u[0])
     logging.info('Не скачаны следующие статьи:{}'.format(bad_url))
 
     end = datetime.now()        # STOP TIME
@@ -176,9 +180,11 @@ def main():
         summary_text = 'Статей, представляющих интерес, не отмечено.'
         color = 'gray'
     summary_text += '\nЗатрачено времени: {}'.format(delta)
+    if rss_threading.rss_current_rest:
+        failed_rss = '\n'.join(rss_threading.rss_current_rest)
+        summary_text += '\nНе получены новости от: \n{}'.format(failed_rss)
     app.label_status.configure(text=summary_text, bg=color)
     root.update()
-
 
 def otsechka():
     second_path = output.output_folder + "от_Паука_на_" + str(datetime.now().strftime("%H.%M %d.%m.%Y")) + "\\"
@@ -212,7 +218,7 @@ class GUI():
 
 if __name__ == "__main__":
 
-    version = '3.0'
+    version = '3.1'
     root = tk.Tk()
     app = GUI(root)
 
