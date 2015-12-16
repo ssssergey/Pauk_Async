@@ -11,18 +11,19 @@ import shutil
 import glob
 import tkinter as tk
 from tkinter.filedialog import *
+import socket
 
 import rss_threading
 import bs4_processing
 import output
 
 
-expire_date = date(2015,12,1) # Date of the program license expiration
+expire_date = date(2016,2,1) # Date of the program license expiration
 
 logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                     level = logging.INFO, filename='Debugging.txt')
 
-
+socket.setdefaulttimeout(30.0)
 def get_rss_data():
     # RSS threading
     rss_threading.url_selected = []
@@ -58,7 +59,7 @@ class Async():
     def download_HTMLs_to_HTMLlist(self,url,title,rss,func,atime):
         print('Start downloading {}'.format(url))
         logging.info('Start downloading {}'.format(url))
-        response = yield from asyncio.wait_for(aiohttp.request('GET', url), 30)  # With timeout
+        response = yield from asyncio.wait_for(aiohttp.request('GET', url),30)  # With timeout
         body = yield from response.read_and_close()
         try:
             if rss in ['News-Asia', 'МигНьюс', 'Коммерсант', 'Грузия-онлайн', 'ЦАМТО']:
@@ -150,7 +151,7 @@ def main():
     app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
     root.update()
     recieved = bs4_and_output(final_list)       # body,title,rss,func,url,atime
-    total = len(rss_threading.url_selected)
+    total = len(today_urls)
     downloaded = len(async_instance.final_list_of_articles)
     total_len += downloaded
     print('Total: {}'.format(total))
@@ -172,18 +173,22 @@ def main():
 
     if recieved:
         otsechka()
-        summary_text = 'Готово! Забирайте папку!'
-        summary_text += '\nCкачано статей: {}'.format(total_len)
+        summary_text = 'Готово! Забирайте папку!\nc:\\от Паука\\'
+        summary_text += '\nОтобрано: {}'.format(total)
+        summary_text += '\nCкачано: {}'.format(total_len)
         summary_text += '\nИспользовано: {}'.format(recieved)
         color = 'yellow'
+    elif len(rss_threading.rss_current_rest) > 20:
+        summary_text = 'ПРОВЕРЬТЕ ИНТЕРНЕТ СОЕДИНЕНИЕ!!!'
+        color = 'red'
     else:
         summary_text = 'Статей, представляющих интерес, не отмечено.'
         color = 'gray'
     summary_text += '\nЗатрачено времени: {}'.format(delta)
-    if rss_threading.rss_current_rest:
+    if rss_threading.rss_current_rest and recieved:
         failed_rss = '\n'.join(rss_threading.rss_current_rest)
         summary_text += '\nНе получены новости от: \n{}'.format(failed_rss)
-    app.label_status.configure(text=summary_text, bg=color)
+    app.label_status.configure(text=summary_text, bg=color, justify=LEFT)
     root.update()
 
 def otsechka():
@@ -218,7 +223,7 @@ class GUI():
 
 if __name__ == "__main__":
 
-    version = '3.1'
+    version = '3.3'
     root = tk.Tk()
     app = GUI(root)
 

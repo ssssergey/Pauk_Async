@@ -11,7 +11,7 @@ import logging
 logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                     level = logging.INFO, filename='Debugging.txt')
 
-socket.setdefaulttimeout(10.0)
+socket.setdefaulttimeout(8.0)
 url_selected = []
 rss_current_rest = []
 rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
@@ -72,7 +72,7 @@ class PullFeeds:
             if not rss_current_rest:
                 break
             self.data = rss_current_rest
-            if i == 1:
+            if i == 0:
                 rss_current_rest = []
             threads = []
             logging.info('!!!RSS second ROUND!!!')

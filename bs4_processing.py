@@ -56,7 +56,9 @@ class NEWSAGENCY():
         return 'Ok'
     def rbc_ukr(self):
         try:
-            self.main_text_class = self.soup.find('div', {'class':'text'}).text
+            self.main_text_class = ''
+            for everyitem in self.soup.find('div',{'class':'text'}).findAll('p'):
+                self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
             logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
@@ -232,8 +234,8 @@ class NEWSAGENCY():
     def vpk(self):
         try:
             self.main_text_class = ''
-            for everyitem in self.soup.find('div',{'class':'field-item even','property':'content:encoded'}).findAll('p'):
-                self.main_text_class = self.main_text_class + '\n' + everyitem.text
+            for everyitem in self.soup.findAll('div',{'class':'field-item even'}):
+                self.main_text_class = self.main_text_class + '\n' + everyitem.text.strip()
             if len(self.main_text_class) > 4000:
                 logging.warning('%%%%%Скорее всего это был анализ.УДАЛЕНО.\n')
                 return 'no_interest'
@@ -311,3 +313,25 @@ class NEWSAGENCY():
             logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
+
+# if __name__ == '__main__':
+#     def vpk(soup):
+#         try:
+#             main_text_class = ''
+#             for everyitem in soup.findAll('div',{'class':'field-item even'}):
+#                 main_text_class = main_text_class + '\n' + everyitem.text.strip()
+#             if len(main_text_class) > 4000:
+#                 logging.warning('%%%%%Скорее всего это был анализ.УДАЛЕНО.\n')
+#                 return 'no_interest'
+#         except Exception as e:
+#             print('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(url, e))
+#             return False
+#         return main_text_class
+#
+#     import requests
+#     url = 'http://vpk-news.ru/news/28369'
+#     sorce_code = requests.get(url, timeout=5)
+#     plain_text = sorce_code.text
+#     soup = BeautifulSoup(plain_text)
+#     print(vpk(soup))
+
