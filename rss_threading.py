@@ -44,6 +44,8 @@ rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://russian.rt.com/rss/':'RussiaToday',
         'http://www.apsnypress.info/news/rss/':'Апсны-Пресс',
         'http://sana.sy/ru/?feed=rss2':'САНА',
+        'http://ria.ru/export/rss2/world/index.xml':'РИА Новости',
+        'http://dan-news.info/feed':'ДАН',
         }
 
 rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kavuzel', 'Тренд':'trend', 'ВПК':'vpk', 'News-Asia':'news_asia',
@@ -51,7 +53,8 @@ rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kav
                  'Грузия-онлайн':'georgiaonline', 'BlackSeaNews':'blacksea', 'ЦАМТО':'camto', 'ИТАР-ТАСС':'itartass',
                  'Росбалт':'rosbalt', 'Би-Би-Си':'bbc', 'РБК-Украина':'rbc_ukr', 'Укринформ':'ukrinform', 'РИА-Новости':'rian',
                  'УНИАН':'unian', 'Корреспондент':'korrespondent','РБК':'rbc_rus','APA.AZ':'apa_az','Спутник':'newsgeorgia',
-                 'ИРНА':'irna','RussiaToday':'rustoday','Апсны-Пресс':'apsnypress','САНА':'sana'}
+                 'ИРНА':'irna','RussiaToday':'rustoday','Апсны-Пресс':'apsnypress','САНА':'sana','РИА Новости':'rianovosti',
+                 'ДАН':'dan'}
 
 
 class PullFeeds:
@@ -111,7 +114,7 @@ class RssParser(threading.Thread):
         rss_item.link = rss_item.link.replace('http://az.apa','http://ru.apa')
         if is_in_history(rss_item) == True:
             return False
-        stop_words = ['боксер','боксёр','хоккеист','Бессмертн','Звездные войны','Звездных войн','Войнов','Путин',
+        stop_words = ['бокс[её]р','хоккеист','бессмертн','зв[её]здны[а-я] войн','\\bвойнов','\\bпутин',
                       'велик[а-я]{2} отечествен','втор[а-я]{2} миров']
         for word in stop_words:
             p = re.compile(word)

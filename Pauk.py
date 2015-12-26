@@ -1,8 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
 __author__ = 'Asus'
-# TODO: Вынести фильтрацию по ключемым словам в файл Pauk
+
+# TODO: Сделать поэтапную фильтрацию как в основном пауке
+# todo: Отделить данные от кода
+# todo: Сделать удобное тестирование отдельных модулей
+
+
 from datetime import datetime, date, timedelta
 import asyncio
 import aiohttp

@@ -313,6 +313,24 @@ class NEWSAGENCY():
             logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
+    def rianovosti(self):
+        try:
+            self.main_text_class = ''
+            for everyitem in self.soup.find('div', {'id': 'article_full_text'}).findAll('p'):
+                self.main_text_class = self.main_text_class + '\n' + everyitem.text
+        except Exception as e:
+            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            return False
+        return 'Ok'
+    def dan(self):
+        try:
+            self.main_text_class = ''
+            for everyitem in self.soup.find('div', {'class': 'entry'}).findAll('p'):
+                self.main_text_class = self.main_text_class + '\n' + everyitem.text
+        except Exception as e:
+            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            return False
+        return 'Ok'
 
 # if __name__ == '__main__':
 #     def vpk(soup):
