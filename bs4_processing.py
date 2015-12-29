@@ -1,17 +1,15 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 __author__ = 'Asus'
 
 from bs4 import BeautifulSoup
-from datetime import date, datetime,timedelta
-import logging
+from config import logger
 
-logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-                    level = logging.INFO, filename='Debugging.txt')
 
 class NEWSAGENCY():
     def __init__(self,item):
         self.main_text_class = ''
-        self.url = item[4]
-        self.rss_name = item[2]
         self.soup = BeautifulSoup(item[0])
         for script in self.soup.findAll('script'):   # Delete all js scripts from soup
             script.decompose()
@@ -31,7 +29,7 @@ class NEWSAGENCY():
         try:
             self.main_text_class = self.soup.find('div', {'class': 'post-item__text'}).text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def unian(self):
@@ -41,7 +39,7 @@ class NEWSAGENCY():
                 if "Читайте также" not in everyitem.text:
                     self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def ukrinform(self):
@@ -51,7 +49,7 @@ class NEWSAGENCY():
                 if "Читайте также:" not in everyitem.text:
                     self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def rbc_ukr(self):
@@ -60,7 +58,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div',{'class':'text'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def rbc_rus(self):
@@ -69,7 +67,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div',{'class':'article__text'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def bbc(self):
@@ -81,7 +79,7 @@ class NEWSAGENCY():
             for everyitem in main_div.findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def lenta(self):
@@ -90,7 +88,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'itemprop': 'articleBody'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def rian(self):
@@ -101,7 +99,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'itemprop': 'articleBody'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def trend(self):
@@ -111,7 +109,7 @@ class NEWSAGENCY():
                 if "@www_Trend_Az" not in everyitem.text and "agency@trend.az" not in everyitem.text:
                     self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def mignews(self):
@@ -131,7 +129,7 @@ class NEWSAGENCY():
             elif self.soup.find('div', {'id': 'leftc'}):
                 self.main_text_class = self.soup.find('div', {'id': 'leftc'}).text + '\n\n'
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def kavuzel(self):
@@ -142,7 +140,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'articles-body'}).findAll('p',recursive=False):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def kommersant(self):
@@ -151,7 +149,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.findAll('p', {'class': 'b-article__text'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def vedomosti(self):
@@ -160,7 +158,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'b-news-item__text b-news-item__text_one'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def georgiaonline(self):
@@ -169,7 +167,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('td', {'class': 'newsbody'}).findAll('div', {'class': 'txt-item-news'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def blacksea(self):
@@ -185,12 +183,12 @@ class NEWSAGENCY():
             for everyitem in self.soup.findAll('div', {'id': 'contentText'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def camto(self):
         if '401' in self.soup.html.head.title.text:
-            logging.warning('%%%%%Платная статья.\n')
+            logger.warning('%%%%%Платная статья.\n')
             self.main_text_class = 'ПЛАТНАЯ СТАТЬЯ'
             self.vremya_class = 'Empty'
             return
@@ -199,7 +197,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'content'}).find('div', {'class': 'mainnews'}).findAll('div'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def itartass(self):
@@ -216,7 +214,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'b-material-text__l'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def rosbalt(self):
@@ -228,7 +226,7 @@ class NEWSAGENCY():
             if not self.main_text_class:
                 self.main_text_class = self.soup.find('article').text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def vpk(self):
@@ -237,10 +235,10 @@ class NEWSAGENCY():
             for everyitem in self.soup.findAll('div',{'class':'field-item even'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text.strip()
             if len(self.main_text_class) > 4000:
-                logging.warning('%%%%%Скорее всего это был анализ.УДАЛЕНО.\n')
+                logger.warning('%%%%%Скорее всего это был анализ.УДАЛЕНО.\n')
                 return 'no_interest'
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def news_asia(self):
@@ -249,7 +247,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.findAll('div',{'class':'content'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def fergana(self):
@@ -258,7 +256,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.findAll('div',{'id':'text'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def apa_az(self):
@@ -267,7 +265,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div',{'class':'content'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def newsgeorgia(self):
@@ -276,7 +274,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'b-article__text'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def irna(self):
@@ -285,7 +283,7 @@ class NEWSAGENCY():
             self.main_text_class = self.main_text_class + '\n' + self.soup.find('h3', {'id': 'ctl00_ctl00_ContentPlaceHolder_ContentPlaceHolder_NewsContent1_H1'}).text
             self.main_text_class = self.main_text_class + '\n' + self.soup.find('p', {'id': 'ctl00_ctl00_ContentPlaceHolder_ContentPlaceHolder_NewsContent1_BodyLabel'}).text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def rustoday(self):
@@ -294,14 +292,14 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('article', {'id': 'content'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def apsnypress(self):
         try:
             self.main_text_class = self.soup.find('div', {'class': 'detail_text'}).text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def sana(self):
@@ -310,7 +308,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'entry'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def rianovosti(self):
@@ -319,7 +317,7 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'id': 'article_full_text'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
     def dan(self):
@@ -328,28 +326,6 @@ class NEWSAGENCY():
             for everyitem in self.soup.find('div', {'class': 'entry'}).findAll('p'):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
         except Exception as e:
-            logging.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
+            logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
-
-# if __name__ == '__main__':
-#     def vpk(soup):
-#         try:
-#             main_text_class = ''
-#             for everyitem in soup.findAll('div',{'class':'field-item even'}):
-#                 main_text_class = main_text_class + '\n' + everyitem.text.strip()
-#             if len(main_text_class) > 4000:
-#                 logging.warning('%%%%%Скорее всего это был анализ.УДАЛЕНО.\n')
-#                 return 'no_interest'
-#         except Exception as e:
-#             print('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(url, e))
-#             return False
-#         return main_text_class
-#
-#     import requests
-#     url = 'http://vpk-news.ru/news/28369'
-#     sorce_code = requests.get(url, timeout=5)
-#     plain_text = sorce_code.text
-#     soup = BeautifulSoup(plain_text)
-#     print(vpk(soup))
-

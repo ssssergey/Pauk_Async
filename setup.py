@@ -12,9 +12,9 @@ excludes=[]
 packages=[]
 	 
 setup( 
-	name = "Паук", 
-	version = "1.0", 
-	description = "Сбор новостей по ключевым словам",
+	name = "Pauk",
+	version = "3.3",
+	description = "New gathering",
 	options = {"build_exe": {"packages": packages, "excludes": [],'include_files':includefiles}},
 	executables = [exe]
 	)

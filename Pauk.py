@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-__author__ = 'Asus'
 
 # TODO: Сделать поэтапную фильтрацию как в основном пауке
 # todo: Отделить данные от кода
@@ -10,7 +9,7 @@ __author__ = 'Asus'
 from datetime import datetime, date, timedelta
 import asyncio
 import aiohttp
-import logging
+from config import logger
 import shutil
 import glob
 import tkinter as tk
@@ -21,66 +20,21 @@ import rss_threading
 import bs4_processing
 import output
 
-
 expire_date = date(2016,2,1) # Date of the program license expiration
 
-logging.basicConfig(format = '%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-                    level = logging.INFO, filename='Debugging.txt')
-
 socket.setdefaulttimeout(30.0)
+
 def get_rss_data():
     # RSS threading
     rss_threading.url_selected = []
     pf = rss_threading.PullFeeds()
     pf.pullfeed()
 
-def today_filter(url_selected):
-    today_url_selected = []
-    for i in url_selected:
-        old_time = i[4]
-        new_time = datetime(old_time.tm_year, old_time.tm_mon, old_time.tm_mday, old_time.tm_hour,old_time.tm_min,
-                            old_time.tm_sec)
-        if i[2] == 'ИРНА':
-            new_time = new_time - timedelta(hours=0.5)
-        elif i[2] == 'Спутник':
-            new_time = new_time + timedelta(hours=2)
-        else:
-            new_time = new_time + timedelta(hours=3)
-        if new_time.day == date.today().day:
-            today_url_selected.append((i[0],i[1],i[2],i[3],new_time))
-        else:
-            output.add_url_to_history(i[0])
-    print("Было: {}, Стало: {}".format(len(url_selected), len(today_url_selected)))
-    return today_url_selected
-
 class Async():
     def __init__(self, url_selected):
         self.data_current = url_selected[:]
         self.data_changable = url_selected[:]
         self.final_list_of_articles = []
-
-    @asyncio.coroutine
-    def download_HTMLs_to_HTMLlist(self,url,title,rss,func,atime):
-        print('Start downloading {}'.format(url))
-        logging.info('Start downloading {}'.format(url))
-        response = yield from asyncio.wait_for(aiohttp.request('GET', url),30)  # With timeout
-        body = yield from response.read_and_close()
-        try:
-            if rss in ['News-Asia', 'МигНьюс', 'Коммерсант', 'Грузия-онлайн', 'ЦАМТО']:
-                body = body.decode(encoding='cp1251')
-            else:
-                body = body.decode(encoding='utf-8')
-        except Exception as e:
-            logging.info('Кодировка: {}'.format(e))
-        self.final_list_of_articles.append([body,title,rss,func,url,atime])
-        try:
-            self.data_changable.remove((url,title,rss,func,atime))
-        except:
-            pass
-        print('Finished {}'.format(url))
-        logging.info('Finished {}'.format(url))
-        app.label_status.configure(text='Осталось скачать статей: {}'.format(len(self.data_changable)), bg='#69969C')
-        root.update()
 
     def start_async(self):
         for i in range(3):
@@ -92,6 +46,31 @@ class Async():
                                    for item in self.data_current])
                 loop.run_until_complete(aw)
         return self.final_list_of_articles      # body,title,rss,func,url,atime
+
+    @asyncio.coroutine
+    def download_HTMLs_to_HTMLlist(self,url,title,rss,func,atime):
+        print('Start downloading {}'.format(url))
+        logger.info('Start downloading {}'.format(url))
+        response = yield from asyncio.wait_for(aiohttp.request('GET', url), 30)  # With timeout
+        body = yield from response.read_and_close()
+        try:
+            if rss in ['News-Asia', 'МигНьюс', 'Коммерсант', 'Грузия-онлайн', 'ЦАМТО']:
+                body = body.decode(encoding='cp1251')
+            else:
+                body = body.decode(encoding='utf-8')
+        except Exception as e:
+            logger.warning('Кодировка: {}'.format(e))
+        self.final_list_of_articles.append([body,title,rss,func,url,atime])
+        try:
+            self.data_changable.remove((url,title,rss,func,atime))
+        except:
+            pass
+        print('Finished {}'.format(url))
+        logger.info('Finished {}'.format(url))
+        app.label_status.configure(text='Осталось скачать статей: {}'.format(len(self.data_changable)), bg='#69969C')
+        root.update()
+
+
 
 def bs4_and_output(final_list_of_articles):
     count = len(final_list_of_articles)
@@ -108,7 +87,8 @@ def bs4_and_output(final_list_of_articles):
                 NA_obj.strip_texts()
                 rss_a = html_item[2]
                 title_a = html_item[1]
-                date_a,time_a = NA_obj.get_time(html_item[5])
+                dtformat = html_item[5]
+                date_a,time_a = NA_obj.get_time(dtformat)
                 maintext_a = NA_obj.main_text_class
 
                 output.country = "Другие"
@@ -137,7 +117,7 @@ def check_license():
 
 def main():
     if check_license() == False:        # Check license
-        app.label_status.configure(text="Обновите программу!", bg='red')
+        app.label_status.configure(text="Обновите программу!\nwww.pauk-press.ru", bg='red')
         return
     start = datetime.now()      # START TIME
     total_len = 0
@@ -147,33 +127,33 @@ def main():
     app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
     root.update()
     get_rss_data()
-    today_urls = today_filter(rss_threading.url_selected)
+    url_selected = rss_threading.url_selected
     app.label_status.configure(text='Начал скачивать СТАТЬИ.\nОЖИДАЙТЕ...')
     root.update()
-    async_instance = Async(today_urls)
+    async_instance = Async(url_selected)
     final_list = async_instance.start_async()
     app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
     root.update()
     recieved = bs4_and_output(final_list)       # body,title,rss,func,url,atime
-    total = len(today_urls)
+    total = len(url_selected)
     downloaded = len(async_instance.final_list_of_articles)
     total_len += downloaded
     print('Total: {}'.format(total))
-    logging.info('Total: {}'.format(total))
+    logger.info('Total: {}'.format(total))
     print('Downloaded: {}'.format(downloaded))
-    logging.info('Downloaded: {}'.format(downloaded))
+    logger.info('Downloaded: {}'.format(downloaded))
     print("LEFT:")
     bad_url = ""
     for u in async_instance.data_changable:
         bad_url += '\n' + u[0]
-    logging.info('Не скачаны следующие статьи:{}'.format(bad_url))
+    logger.info('Не скачаны следующие статьи:{}'.format(bad_url))
 
     end = datetime.now()        # STOP TIME
     delta = end - start
     delta = '{} сек.'.format(delta.seconds)
 
     print('Timing: {}'.format(delta))
-    logging.info('Timing: {}'.format(delta))
+    logger.info('Timing: {}'.format(delta))
 
     if recieved:
         otsechka()
