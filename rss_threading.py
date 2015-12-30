@@ -8,7 +8,7 @@ import re
 import os
 from datetime import datetime, date, timedelta
 
-from config import logger, rss_dict, rss_func_dict, keyword_file, history_file, bucket_file, stop_words
+from config import logger, logger_history, logger_bucket, rss_dict, rss_func_dict, keyword_file, history_file, stop_words
 
 socket.setdefaulttimeout(8.0)
 url_selected = []
@@ -60,7 +60,7 @@ class RssParser(threading.Thread):
         if len(rss_data['entries']):
             logger.info("{}: TOTAL - {}".format(self.rss_title,len(rss_data['entries'])))
             for entry in rss_data.get('entries'):
-                self.entry_time = None
+                self.time_handler(entry.published_parsed)
                 if self.add_to_selected_or_not(entry):
                     print(entry.title)
                     print(entry.link)
@@ -83,8 +83,8 @@ class RssParser(threading.Thread):
         rss_item.link = rss_item.link.replace('http://az.apa','http://ru.apa')
         if is_in_history(rss_item.link) == True:
             return False
-
-        if not self.time_filter(rss_item.published_parsed):
+        if not self.time_filter():
+            logger_history.info(rss_item.link)
             return False
         keywords_text = keywords_extract()
         for word in keywords_text:  # перебираем ключевые слова
@@ -93,15 +93,14 @@ class RssParser(threading.Thread):
                 for word in stop_words:
                     p = re.compile(word)
                     if p.search(rss_item.title.lower()) or p.search(rss_item.title):
-                        print(rss_item.title, file=open(bucket_file,'a',encoding='utf-8'))
+                        logger_bucket.info(rss_item.title)
                         print("Stopword")
-                        with open(history_file, 'a') as history_txt:
-                            history_txt.write(rss_item.link + ' ' + str(datetime.now()) + '\n')
+                        logger_history.info(rss_item.link)
                         return False
                 return True
         return False
 
-    def time_filter(self, entry_time):
+    def time_handler(self, entry_time):
         old_time = entry_time
         new_time = datetime(old_time.tm_year, old_time.tm_mon, old_time.tm_mday, old_time.tm_hour,old_time.tm_min,
                             old_time.tm_sec)
@@ -111,8 +110,10 @@ class RssParser(threading.Thread):
             new_time = new_time + timedelta(hours=2)
         else:
             new_time = new_time + timedelta(hours=3)
-        if new_time.day == date.today().day:
-            self.entry_time = new_time
+        self.entry_time = new_time
+
+    def time_filter(self):
+        if self.entry_time.day == date.today().day:
             return True
         else:
             return False
