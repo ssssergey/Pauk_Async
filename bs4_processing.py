@@ -1,27 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-__author__ = 'Asus'
-
 from bs4 import BeautifulSoup
 from config import logger
 
 
 class NEWSAGENCY():
-    def __init__(self,item):
+    def __init__(self, html_script):
         self.main_text_class = ''
-        self.soup = BeautifulSoup(item[0])
+        self.soup = BeautifulSoup(html_script)
         for script in self.soup.findAll('script'):   # Delete all js scripts from soup
             script.decompose()
         for style in self.soup.findAll('style'):     # Delete all css styles from soup
             style.decompose()
-
-    def get_time(self, datetime_format):
-        month_names = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря']
-        self.month_name = month_names[datetime_format.month - 1]
-        self.date_final = '{} {} {} г.'.format(str(datetime_format.day).lstrip("0"),self.month_name,str(datetime_format.year))
-        self.time_final = datetime_format.strftime("%H.%M")
-        return self.date_final, self.time_final
     def strip_texts(self):
         self.main_text_class = "\n".join([line.strip() for line in self.main_text_class.split('\n') if line.strip()])
 
@@ -329,3 +320,11 @@ class NEWSAGENCY():
             logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False
         return 'Ok'
+
+if __name__ == '__main__':
+    import requests
+    html_code = requests.get("url")
+    plain_text = html_code.text
+    obj = NEWSAGENCY(plain_text)
+    obj.kommersant()
+    print(obj.main_text_class)

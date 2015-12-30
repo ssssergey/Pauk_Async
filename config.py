@@ -8,7 +8,10 @@ log_file = os.path.join(basedir,'spam.log')
 keyword_file = os.path.join(basedir,'keywords_militar.txt')
 history_file = os.path.join(basedir,'history.txt')
 bucket_file = os.path.join(basedir,'bucket.txt')
+
 output_folder = 'c:\\от Паука\\'
+
+text_size_limit = 6000
 
 import logging
 logger = logging.getLogger('spam_app')

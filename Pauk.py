@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # TODO: Сделать поэтапную фильтрацию как в основном пауке
-# todo: Отделить данные от кода
 # todo: Сделать удобное тестирование отдельных модулей
 
 
@@ -19,6 +18,7 @@ import socket
 import rss_threading
 import bs4_processing
 import output
+from config import text_size_limit, bucket_file
 
 expire_date = date(2016,2,1) # Date of the program license expiration
 
@@ -71,43 +71,42 @@ class Async():
         root.update()
 
 
-
 def bs4_and_output(final_list_of_articles):
     count = len(final_list_of_articles)
     recieved = 0
     for html_item in final_list_of_articles:        # consist of body,title,rss,func,url,atime
+        body,title_a,rss_a,func,url,dtformat = html_item
         count -= 1
         app.label_status.configure(text='Осталось обработать: {}'.format(count), bg='#69969C')
         root.update()
-        NA_obj = bs4_processing.NEWSAGENCY(html_item)
-        func_result = getattr(NA_obj,html_item[3])()
+        NA_obj = bs4_processing.NEWSAGENCY(body)
+        func_result = getattr(NA_obj,func)()
         if func_result != False:       # Parse by IA name
-            output.add_url_to_history(html_item[4])
+            output.add_url_to_history(url)
             if func_result != 'no_interest':
                 NA_obj.strip_texts()
-                rss_a = html_item[2]
-                title_a = html_item[1]
-                dtformat = html_item[5]
-                date_a,time_a = NA_obj.get_time(dtformat)
                 maintext_a = NA_obj.main_text_class
-
+                maintext_a = maintext_a + "\n" + url
+                date_a,time_a = output.get_str_date_time(dtformat)
                 output.country = "Другие"
                 output.define_country_by_zagolovok(title_a)
                 if output.country == "Другие":
-                    maintext_a = output.define_country_by_mtext(maintext_a)
-                # if output.output_or_not(html_item[5]) == True:              # Передаем аргументом datetime_format
-                recieved += 1
-                if output.country == 'Украина' and (rss_a == 'УНИАН' or rss_a == 'Корреспондент' or
-                                                    rss_a == 'РБК-Украина' or rss_a == 'Укринформ' or
-                                                    rss_a == 'BlackSeaNews'):
-                    patterns = ("[\w-]*террорист[а-я]*","боевик[а-я]*","сепаратист[а-я]*","самопровозглаш[а-я]*","оккупант[а-я]*","бандформирован[а-я]*")
-                    for p in patterns:
-                        p = "({})".format(p)
-                        maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
-                try:
-                    output.output_to_word(title_a, maintext_a, date_a, time_a,rss_a)
-                except Exception as e:
-                    output.output_to_txt(title_a, maintext_a, date_a, time_a,rss_a)
+                    output.define_country_by_mtext(maintext_a)
+                # if output.country == 'Украина' and (rss_a == 'УНИАН' or rss_a == 'Корреспондент' or
+                #                                     rss_a == 'РБК-Украина' or rss_a == 'Укринформ' or
+                #                                     rss_a == 'BlackSeaNews'):
+                #     patterns = ("[\w-]*террорист[а-я]*","боевик[а-я]*","сепаратист[а-я]*","самопровозглаш[а-я]*","оккупант[а-я]*","бандформирован[а-я]*")
+                #     for p in patterns:
+                #         p = "({})".format(p)
+                #         maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
+                if len(maintext_a) < text_size_limit:
+                    try:
+                        output.output_to_word(title_a, maintext_a, date_a, time_a,rss_a)
+                    except Exception as e:
+                        output.output_to_txt(title_a, maintext_a, date_a, time_a,rss_a)
+                    recieved += 1
+                else:
+                    print(title_a + " - СЛИШКОМ БОЛЬШОЙ ТЕКСТ", file=open(bucket_file,'a',encoding='utf-8'))
     return recieved
 
 def check_license():
@@ -120,29 +119,23 @@ def main():
         app.label_status.configure(text="Обновите программу!\nwww.pauk-press.ru", bg='red')
         return
     start = datetime.now()      # START TIME
-    total_len = 0
-
-    # global final_list_of_articles
-    # final_list_of_articles = []
     app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
     root.update()
     get_rss_data()
-    url_selected = rss_threading.url_selected
+    url_selected = rss_threading.url_selected       # link,title,rss,func,url,atime
+    total = len(url_selected)
     app.label_status.configure(text='Начал скачивать СТАТЬИ.\nОЖИДАЙТЕ...')
     root.update()
     async_instance = Async(url_selected)
-    final_list = async_instance.start_async()
+    final_list = async_instance.start_async()           # body,title,rss,func,url,atime
+    downloaded = len(async_instance.final_list_of_articles)
     app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
     root.update()
-    recieved = bs4_and_output(final_list)       # body,title,rss,func,url,atime
-    total = len(url_selected)
-    downloaded = len(async_instance.final_list_of_articles)
-    total_len += downloaded
+    recieved = bs4_and_output(final_list)
     print('Total: {}'.format(total))
     logger.info('Total: {}'.format(total))
     print('Downloaded: {}'.format(downloaded))
     logger.info('Downloaded: {}'.format(downloaded))
-    print("LEFT:")
     bad_url = ""
     for u in async_instance.data_changable:
         bad_url += '\n' + u[0]
@@ -151,15 +144,13 @@ def main():
     end = datetime.now()        # STOP TIME
     delta = end - start
     delta = '{} сек.'.format(delta.seconds)
-
-    print('Timing: {}'.format(delta))
     logger.info('Timing: {}'.format(delta))
 
     if recieved:
         otsechka()
         summary_text = 'Готово! Забирайте папку!\nc:\\от Паука\\'
         summary_text += '\nОтобрано: {}'.format(total)
-        summary_text += '\nCкачано: {}'.format(total_len)
+        summary_text += '\nCкачано: {}'.format(downloaded)
         summary_text += '\nИспользовано: {}'.format(recieved)
         color = 'yellow'
     elif len(rss_threading.rss_current_rest) > 20:

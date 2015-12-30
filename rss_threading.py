@@ -83,12 +83,7 @@ class RssParser(threading.Thread):
         rss_item.link = rss_item.link.replace('http://az.apa','http://ru.apa')
         if is_in_history(rss_item.link) == True:
             return False
-        for word in stop_words:
-            p = re.compile(word)
-            if p.search(rss_item.title.lower()) or p.search(rss_item.title):
-                print(rss_item.title, file=open(bucket_file,'a',encoding='utf-8'))
-                print("Stopword")
-                return False
+
         if not self.time_filter(rss_item.published_parsed):
             print("Time")
             return False
@@ -96,6 +91,12 @@ class RssParser(threading.Thread):
         for word in keywords_text:  # перебираем ключевые слова
             p = re.compile(word)
             if p.search(rss_item.title.lower()) or p.search(rss_item.title):
+                for word in stop_words:
+                    p = re.compile(word)
+                    if p.search(rss_item.title.lower()) or p.search(rss_item.title):
+                        print(rss_item.title, file=open(bucket_file,'a',encoding='utf-8'))
+                        print("Stopword")
+                        return False
                 return True
         print("No keyword")
         return False

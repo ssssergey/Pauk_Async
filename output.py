@@ -36,16 +36,15 @@ def define_country_by_mtext(mtext_a):
             p = re.compile(k_word)
             if p.search(mtext_a[:350]) or p.search(mtext_a[:350].lower()):  # Поиск производится примерно в первых двух абзацах (350 знаков) осн текста
                 country = k[1]
-                return mtext_a
-    return mtext_a
+                return
 
-def output_or_not(datetime_format):
-    str_date = str(datetime_format.date())
-    today_date = str(datetime.today().date())
-    if str_date != today_date:
-        return False
-    else:
-        return True
+def get_str_date_time(datetime_format):
+    month_names = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября',
+                   'декабря']
+    month_name = month_names[datetime_format.month - 1]
+    date_final = '{} {} {} г.'.format(str(datetime_format.day).lstrip("0"),month_name,str(datetime_format.year))
+    time_final = datetime_format.strftime("%H.%M")
+    return date_final, time_final
 
 def output_to_txt(title_a, mtext_a, date_a, time_a,rss_a):
     with open(output_folder + country + ' ' + str(date.today()) + '.txt', 'a', encoding='utf-8') as text_file:
@@ -84,8 +83,6 @@ def output_to_word(title_a, mtext_a, date_a, time_a,rss_a):
     worddoc.Save()
     worddoc.Close()
     # wordapp.Quit()
-
-
 
 def add_url_to_history(url):
     with open(history_file, 'a') as history_txt:
