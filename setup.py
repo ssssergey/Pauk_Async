@@ -6,7 +6,7 @@ exe = Executable(
      base="Win32Gui"
      )
 
-includefiles=["keywords_militar.txt","setup\history.txt","setup\msvcr100.dll"]
+includefiles=["keywords_militar.txt","setup\history.txt","setup\msvcr100.dll","Icon.ico"]
 includes=[]
 excludes=[]
 packages=[]

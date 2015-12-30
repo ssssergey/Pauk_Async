@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import re
 from datetime import datetime, date
 import time
 import os
-from config import output_folder, history_file, country_filter
-
+import sqlite3
+from config import output_folder, os_current, text_size_limit, db_file, bucket_file, logger
 try:
     import win32com.client
     from win32com.gen_py import *
@@ -14,48 +13,18 @@ except:
     pass
 
 
-if not os.path.exists(output_folder):
-    os.makedirs(output_folder)
-
-
-country = "Другие"
-
-def define_country_by_zagolovok(title_a):
-    global country
-    for k in country_filter.items():
-        for k_word in k[0]:
-            p = re.compile(k_word)
-            if p.search(title_a) or p.search(title_a.lower()):
-                country = k[1]
-                return
-
-def define_country_by_mtext(mtext_a):
-    global country
-    for k in country_filter.items():
-        for k_word in k[0]:
-            p = re.compile(k_word)
-            if p.search(mtext_a[:350]) or p.search(mtext_a[:350].lower()):  # Поиск производится примерно в первых двух абзацах (350 знаков) осн текста
-                country = k[1]
-                return
-
-def get_str_date_time(datetime_format):
-    month_names = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября',
-                   'декабря']
-    month_name = month_names[datetime_format.month - 1]
-    date_final = '{} {} {} г.'.format(str(datetime_format.day).lstrip("0"),month_name,str(datetime_format.year))
-    time_final = datetime_format.strftime("%H.%M")
-    return date_final, time_final
-
-def output_to_txt(title_a, mtext_a, date_a, time_a,rss_a):
+def output_to_txt(title_a, mtext_a, date_a, time_a, rss_a, country):
     with open(output_folder + country + ' ' + str(date.today()) + '.txt', 'a', encoding='utf-8') as text_file:
         try:
             text_file.write('{} ({} ИА "{}")\n'.format(date_a,time_a,rss_a))
             text_file.write('{}\n'.format(title_a))
             text_file.write('{}\n\n'.format(mtext_a))
+            return True
         except Exception as e:
+            logger.warning(str(e))
             print(str(e) + '\n')
 
-def output_to_word(title_a, mtext_a, date_a, time_a,rss_a):
+def output_to_word(title_a, mtext_a, date_a, time_a, rss_a, country):
     wordapp = win32com.client.gencache.EnsureDispatch("Word.Application") # Create new Word Object
     wordapp.Visible = 1 # Word Application should`t be visible
     out_path = output_folder + country + ' ' + str(date.today()) + ".doc"
@@ -82,11 +51,52 @@ def output_to_word(title_a, mtext_a, date_a, time_a,rss_a):
     wordapp.Selection.TypeText('{}\n\n'.format(mtext_a))
     worddoc.Save()
     worddoc.Close()
+    return True
     # wordapp.Quit()
 
-def add_url_to_history(url):
-    with open(history_file, 'a') as history_txt:
-        history_txt.write(url + ' ' + str(datetime.now()) + '\n')
+def output_to_sql(title_a, mtext_a, dtformat, rss_a, country):
+    try:
+        current_time = datetime.now()
+        conn = sqlite3.connect(db_file)
+        cur = conn.cursor()
+        cur.execute('''CREATE TABLE IF NOT EXISTS main(rss_source TEXT, article_title TEXT, article_text TEXT, article_time TEXT,
+                    extraction_time TEXT, country TEXT, id INTEGER PRIMARY KEY)''')
+        cur.execute('''INSERT INTO main (rss_source, article_title, article_text, article_time, extraction_time, country) VALUES (
+            ?,?,?,?,?,?)''',(rss_a,title_a,mtext_a,dtformat,current_time,country))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        logger.warning(str(e))
 
 
+def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
+    # if output.country == 'Украина' and (rss_a == 'УНИАН' or rss_a == 'Корреспондент' or
+    #                                     rss_a == 'РБК-Украина' or rss_a == 'Укринформ' or
+    #                                     rss_a == 'BlackSeaNews'):
+    #     patterns = ("[\w-]*террорист[а-я]*","боевик[а-я]*","сепаратист[а-я]*","самопровозглаш[а-я]*","оккупант[а-я]*","бандформирован[а-я]*")
+    #     for p in patterns:
+    #         p = "({})".format(p)
+    #         maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
 
+    if len(maintext_a) > text_size_limit:
+        print(title_a + " - СЛИШКОМ БОЛЬШОЙ ТЕКСТ", file=open(bucket_file,'a',encoding='utf-8'))
+        return False
+    if os_current == 'Windows':
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        try:
+            if output_to_word(title_a, maintext_a, date_a, time_a, rss_a, country):
+                return True
+            else:
+                return False
+        except Exception as e:
+            if output_to_txt(title_a, maintext_a, date_a, time_a, rss_a, country):
+                return True
+            else:
+                return False
+    elif os_current == 'Linux':
+        if output_to_sql(title_a, maintext_a, dtformat, rss_a, country):
+            return True
+        else:
+            return False

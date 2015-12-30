@@ -225,9 +225,6 @@ class NEWSAGENCY():
             self.main_text_class = ''
             for everyitem in self.soup.findAll('div',{'class':'field-item even'}):
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text.strip()
-            if len(self.main_text_class) > 4000:
-                logger.warning('%%%%%Скорее всего это был анализ.УДАЛЕНО.\n')
-                return 'no_interest'
         except Exception as e:
             logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(self.url, e))
             return False

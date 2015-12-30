@@ -85,7 +85,6 @@ class RssParser(threading.Thread):
             return False
 
         if not self.time_filter(rss_item.published_parsed):
-            print("Time")
             return False
         keywords_text = keywords_extract()
         for word in keywords_text:  # перебираем ключевые слова
@@ -96,9 +95,10 @@ class RssParser(threading.Thread):
                     if p.search(rss_item.title.lower()) or p.search(rss_item.title):
                         print(rss_item.title, file=open(bucket_file,'a',encoding='utf-8'))
                         print("Stopword")
+                        with open(history_file, 'a') as history_txt:
+                            history_txt.write(rss_item.link + ' ' + str(datetime.now()) + '\n')
                         return False
                 return True
-        print("No keyword")
         return False
 
     def time_filter(self, entry_time):

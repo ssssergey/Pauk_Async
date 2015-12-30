@@ -1,26 +1,48 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import collections
-
+from datetime import date
 import os
+
+os_all = ['Windows','Linux']
+os_current = os_all[0]
+
+# paths
 basedir = os.path.abspath(os.path.dirname(__file__))
 log_file = os.path.join(basedir,'spam.log')
 keyword_file = os.path.join(basedir,'keywords_militar.txt')
 history_file = os.path.join(basedir,'history.txt')
 bucket_file = os.path.join(basedir,'bucket.txt')
+icon_file = os.path.join(basedir,'Icon.ico')
+db_file = os.path.join(basedir,'pauk_db.db')
 
 output_folder = 'c:\\от Паука\\'
 
-text_size_limit = 6000
+text_size_limit = 5000
+
+expire_date = date(2016,2,1) # Date of the program license expiration
+
+version = '3.4'
 
 import logging
-logger = logging.getLogger('spam_app')
+formatter = logging.Formatter('%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s')
+logger = logging.getLogger()
 handler = logging.FileHandler(log_file)
 handler.setLevel(logging.WARNING)
-formatter = logging.Formatter('%(filename)s |%(funcName)s| [LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+logger_bucket = logging.getLogger()
+handler = logging.FileHandler(bucket_file)
+handler.setLevel(logging.INFO)
+handler.setFormatter(formatter)
+logger_bucket.addHandler(handler)
+
+logger_history = logging.getLogger()
+handler = logging.FileHandler(history_file)
+handler.setLevel(logging.INFO)
+handler.setFormatter(formatter)
+logger_history.addHandler(handler)
 
 rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://apsny.ge/RSS.xml':'Грузия-онлайн',
