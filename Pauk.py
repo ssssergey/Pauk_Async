@@ -16,7 +16,7 @@ import socket
 import rss_threading
 import bs4_processing
 from output import output
-from config import logger, expire_date, version, icon_file, country_filter, history_file, output_folder
+from config import logger, expire_date, version, icon_file, country_filter, output_folder, logger_history
 
 socket.setdefaulttimeout(30.0)
 
@@ -120,9 +120,10 @@ def get_str_date_time(datetime_format):
     time_final = datetime_format.strftime("%H.%M")
     return date_final, time_final
 
-def add_url_to_history(url):
-    with open(history_file, 'a') as history_txt:
-        history_txt.write(url + ' ' + str(datetime.now()) + '\n')
+def add_url_to_history(link):
+    logger_history.warning(link)
+    # with open(history_file, 'a') as history_txt:
+    #     history_txt.write(url + ' ' + str(datetime.now()) + '\n')
 
 def check_license():
     if date.today() > expire_date:
@@ -149,7 +150,7 @@ def main():
     app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
     root.update()
     get_rss_data()
-    url_selected = rss_threading.url_selected           # link,title,rss,func,atime
+    url_selected = rss_threading.url_selected         # link,title,rss,func,atime
     total_count = len(url_selected)
     app.label_status.configure(text='Начал скачивать СТАТЬИ.\nОЖИДАЙТЕ...')
     root.update()
