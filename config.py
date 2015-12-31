@@ -3,6 +3,7 @@
 import collections
 from datetime import date
 import os
+import time
 
 os_all = ['Windows','Linux']
 os_current = os_all[0]
@@ -25,6 +26,9 @@ expire_date = date(2016,2,1) # Date of the program license expiration
 version = '3.4'
 
 import logging
+if os_current == 'Linux':
+    logging.Formatter.converter = time.gmtime
+
 logger = logging.getLogger('logger')
 handler = logging.FileHandler(log_file, encoding='utf8')
 handler.setLevel(logging.WARNING)
@@ -89,7 +93,8 @@ rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kav
                  'ДАН':'dan'}
 
 stop_words = ['бокс[её]р','хоккеист','бессмертн','зв[её]здны[а-я] войн','\\bвойнов','\\bпутин',
-              'велик[а-я]{2} отечествен','втор[а-я]{2} миров','Война и мир']
+              'велик[а-я]{2} отечествен','втор[а-я]{2} миров','Война и мир','Лавров','Песков','Захарова','МО РФ:',
+              'Минобороны РФ:']
 
 country_filter = collections.OrderedDict([
     (('азербайдж','Баку(?!\s*\-\s*АПА\.)','карабах','армян','ереван','Армени','бакинск','нахчыван','Агдаш','\\bНардаран'),'Азербайджан'),

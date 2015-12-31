@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# TODO: Сделать поэтапную фильтрацию как в основном пауке
-# todo: Сделать удобное тестирование отдельных модулей
-
 from datetime import datetime, date
 import asyncio
 import aiohttp
@@ -80,7 +77,7 @@ def bs4_and_output(art_list_downloaded):
 			getattr(NA_obj,func)()
 		except Exception as e:
 			logger.warning('%%%%%В {} не найдено self.main_text_class.\n{}\n'.format(link, e))
-			logger_history.info(link)
+			logger_history.warning(link)
 			continue
 		NA_obj.strip_texts()
 		maintext_a = NA_obj.main_text_class
@@ -91,7 +88,7 @@ def bs4_and_output(art_list_downloaded):
 			country = define_country_by_mtext(maintext_a)
 		if output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
 			count_recieved += 1
-			logger_history.info(link)
+			logger_history.warning(link)
 	return count_recieved
 
 def define_country_by_zagolovok(title_a):

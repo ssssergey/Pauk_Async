@@ -31,8 +31,9 @@ class NEWSAGENCY():
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def rbc_ukr(self):
         self.main_text_class = ''
-        for everyitem in self.soup.find('div',{'class':'text'}).findAll('p'):
-            self.main_text_class = self.main_text_class + '\n' + everyitem.text
+        for everyitem in self.soup.find('div',{'class':'text'}).findAll('p',recursive=False):
+            if "Читайте также:" not in everyitem.text:
+                self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def rbc_rus(self):
         self.main_text_class = ''
         for everyitem in self.soup.find('div',{'class':'article__text'}).findAll('p'):
@@ -89,6 +90,10 @@ class NEWSAGENCY():
         for everyitem in self.soup.find('div', {'class': 'b-news-item__text b-news-item__text_one'}).findAll('p'):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def georgiaonline(self):
+        for trash in self.soup.findAll('a'):
+            trash.decompose()
+        for trash in self.soup.findAll('strong'):
+            trash.decompose()
         self.main_text_class = ''
         for everyitem in self.soup.find('td', {'class': 'newsbody'}).findAll('div', {'class': 'txt-item-news'}):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
@@ -168,7 +173,8 @@ class NEWSAGENCY():
     def rianovosti(self):
         self.main_text_class = ''
         for everyitem in self.soup.find('div', {'id': 'article_full_text'}).findAll('p'):
-            self.main_text_class = self.main_text_class + '\n' + everyitem.text
+            if "Читайте также:" not in everyitem.text:
+                self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def dan(self):
         self.main_text_class = ''
         for everyitem in self.soup.find('div', {'class': 'entry'}).findAll('p'):
@@ -177,8 +183,9 @@ class NEWSAGENCY():
 
 if __name__ == '__main__':
     import requests
-    html_code = requests.get("url")
+    html_code = requests.get("http://www.rbc.ua/rus/news/lysenko-sily-ato-nahodyatsya-polnoy-gotovnosti-1451472857.html")
+    # html_code.encoding = 'utf8'
     plain_text = html_code.text
     obj = NEWSAGENCY(plain_text)
-    obj.kommersant()
+    obj.rbc_ukr()
     print(obj.main_text_class)

@@ -84,7 +84,6 @@ class RssParser(threading.Thread):
         if is_in_history(rss_item.link) == True:
             return False
         if not self.time_filter():
-            logger_history.info(rss_item.link)
             return False
         keywords_text = keywords_extract()
         for word in keywords_text:  # перебираем ключевые слова
@@ -93,9 +92,9 @@ class RssParser(threading.Thread):
                 for word in stop_words:
                     p = re.compile(word)
                     if p.search(rss_item.title.lower()) or p.search(rss_item.title):
-                        logger_bucket.info(rss_item.title)
+                        logger_bucket.warning(rss_item.title)
                         print("Stopword")
-                        logger_history.info(rss_item.link)
+                        logger_history.warning(rss_item.link)
                         return False
                 return True
         return False

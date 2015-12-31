@@ -80,7 +80,7 @@ def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
     #         maintext_a = re.sub(p,r'"\1"',maintext_a,flags=re.IGNORECASE)
 
     if len(maintext_a) > text_size_limit:
-        logger_bucket.info(title_a + " - СЛИШКОМ БОЛЬШОЙ ТЕКСТ")
+        logger_bucket.warning(title_a + " - СЛИШКОМ БОЛЬШОЙ ТЕКСТ")
         return False
     if os_current == 'Windows':
         if not os.path.exists(output_folder):
@@ -96,7 +96,8 @@ def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
             else:
                 return False
     elif os_current == 'Linux':
-        if output_to_sql(title_a, maintext_a, dtformat, rss_a, country):
-            return True
-        else:
-            return False
+        if country != 'Другие':
+            if output_to_sql(title_a, maintext_a, dtformat, rss_a, country):
+                return True
+            else:
+                return False
