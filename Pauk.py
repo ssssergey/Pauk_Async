@@ -11,17 +11,28 @@ from tkinter.filedialog import *
 import socket
 import re
 
-import rss_threading
+from rss_downloader import RssDownloader, url_selected
 import bs4_processing
 from output import output
-from config import logger, expire_date, version, icon_file, country_filter, output_folder, logger_history
+from config import logger, expire_date, version, icon_file, country_filter, output_folder, logger_history, rss_dict
 
-socket.setdefaulttimeout(30.0)
+import os
+
+socket.setdefaulttimeout(10.0)
 
 def get_rss_data():
-	rss_threading.url_selected = []
-	pf = rss_threading.PullFeeds()
-	pf.pullfeed()
+	rss_title_list = [rss_title for rss_title in rss_dict.values()]
+	for rss_url in rss_dict.keys():
+		left_list = '\n'.join([str(len(rss_title_list)-i) + ". " + item for i,item in enumerate(rss_title_list)])
+		left_list = '|--ОСТАЛОСЬ СКАЧАТЬ RSS--|\n' + left_list
+		app.label_status.configure(text=left_list, bg='#69969C')
+		root.update()
+		rssdownloader = RssDownloader(rss_url)
+		if rssdownloader.start():
+			rss_title_list.remove(rss_dict[rss_url])
+	return rss_title_list
+
+#-------------------Async-------------------------#
 
 class Async():
 	def __init__(self, url_selected):
@@ -61,7 +72,7 @@ class Async():
 		print('Finished {}'.format(link))
 		logger.info('Finished {}'.format(link))
 		app.label_status.configure(text='Осталось скачать статей: {}'.format(len(self.data_changable)), bg='#69969C')
-		root.update()
+		app.label_status.update()
 
 
 def bs4_and_output(art_list_downloaded):
@@ -71,7 +82,7 @@ def bs4_and_output(art_list_downloaded):
 		body,title_a,rss_a,func,link,dtformat = html_item
 		count_left_art -= 1
 		app.label_status.configure(text='Осталось обработать: {}'.format(count_left_art), bg='#69969C')
-		root.update()
+		app.label_status.update()
 		NA_obj = bs4_processing.NEWSAGENCY(body)
 		try:
 			getattr(NA_obj,func)()
@@ -86,7 +97,7 @@ def bs4_and_output(art_list_downloaded):
 		country = define_country_by_zagolovok(title_a)
 		if country == "Другие":
 			country = define_country_by_mtext(maintext_a)
-		if output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
+		if output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country,link):
 			count_recieved += 1
 			logger_history.warning(link)
 	return count_recieved
@@ -136,15 +147,16 @@ def otsechka():
 		pass
 	app.label_status.configure(text="Нажмите ПУСК", bg='#69969C')
 
+
 def main():
 	if check_license() == False:                        # Check license
 		app.label_status.configure(text="Обновите программу!\nwww.pauk-press.ru", bg='red')
 		return
-	start = datetime.now()                              # START TIME
 	app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
-	root.update()
-	get_rss_data()
-	url_selected = rss_threading.url_selected         # link,title,rss,func,atime
+	app.label_status.update()
+
+	start = datetime.now()                              # START TIME
+	undownloaded_rss = get_rss_data()
 	total_count = len(url_selected)
 	app.label_status.configure(text='Начал скачивать СТАТЬИ.\nОЖИДАЙТЕ...')
 	root.update()
@@ -152,7 +164,7 @@ def main():
 	art_list_downloaded = async_instance.start_async()           # body,title,rss,func,link,atime
 	downloaded_count = len(async_instance.final_list_of_articles)
 	app.label_status.configure(text='Начал обработку СТАТЕЙ.\nОЖИДАЙТЕ...')
-	root.update()
+	app.label_status.update()
 	recieved_count = bs4_and_output(art_list_downloaded)
 	print('Total: {}'.format(total_count))
 	logger.info('Total: {}'.format(total_count))
@@ -176,18 +188,18 @@ def main():
 		summary_text += '\nCкачано: {}'.format(downloaded_count)
 		summary_text += '\nИспользовано: {}'.format(recieved_count)
 		color = 'yellow'
-	elif len(rss_threading.rss_current_rest) > 20:
+	elif len(undownloaded_rss) > 20:
 		summary_text = 'ПРОВЕРЬТЕ ИНТЕРНЕТ СОЕДИНЕНИЕ!!!'
 		color = 'red'
 	else:
 		summary_text = 'Статей, представляющих интерес, не отмечено.'
 		color = 'gray'
 	summary_text += '\nЗатрачено времени: {}'.format(delta)
-	if rss_threading.rss_current_rest and recieved_count:
-		failed_rss = '\n'.join(rss_threading.rss_current_rest)
+	if undownloaded_rss and recieved_count:
+		failed_rss = '\n'.join(undownloaded_rss)
 		summary_text += '\nНе получены новости от: \n{}'.format(failed_rss)
 	app.label_status.configure(text=summary_text, bg=color, justify=LEFT)
-	root.update()
+	app.label_status.update()
 
 class GUI():
 	def __init__(self, root):
@@ -197,12 +209,13 @@ class GUI():
 		self.button_start = tk.Button(root, text="ПУСК", font=("Arial 15 bold"), bg='#012E34', fg='white',
 									  command=main)
 		self.button_start.pack(fill=X)
-		self.label_status = tk.Label(root, text="Нажмите ПУСК", font=("Arial 12"), bg='#69969C')
+		self.label_status = tk.Label(root, text="Нажмите ПУСК", justify=LEFT, font=("Arial 12"), bg='#69969C')
 		self.label_status.pack(fill=X)
 		separator1 = tk.Frame(root, height=5, bg='#0E464E', bd=3)
 		separator1.pack(fill=X)
 		self.label_author = tk.Label(root, text='Версия: {} - 2015 г.\nРазработчик: Ли С.Е.'.format(version), bg='#69969C')
 		self.label_author.pack(fill=X)
+
 
 if __name__ == "__main__":
 	root = tk.Tk()

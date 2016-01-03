@@ -9,13 +9,20 @@ os_all = ['Windows','Linux']
 os_current = os_all[0]
 
 # paths
-basedir = os.path.abspath(os.path.dirname(__file__))
-log_file = os.path.join(basedir,'Debugging.log')
-keyword_file = os.path.join(basedir,'keywords_militar.txt')
-history_file = os.path.join(basedir,'history.txt')
-bucket_file = os.path.join(basedir,'bucket.txt')
-icon_file = os.path.join(basedir,'Icon.ico')
-db_file = os.path.join(basedir,'pauk_db.db')
+log_file = 'Debugging.log'
+keyword_file = 'keywords_militar.txt'
+history_file = 'history.txt'
+bucket_file = 'bucket.txt'
+icon_file = 'Icon.ico'
+db_file = 'pauk_db.db'
+if os_current == 'Linux':
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    log_file = os.path.join(basedir,'Debugging.log')
+    keyword_file = os.path.join(basedir,'keywords_militar.txt')
+    history_file = os.path.join(basedir,'history.txt')
+    bucket_file = os.path.join(basedir,'bucket.txt')
+    icon_file = os.path.join(basedir,'Icon.ico')
+    db_file = os.path.join(basedir,'pauk_db.db')
 
 output_folder = 'c:\\от Паука\\'
 
@@ -57,9 +64,6 @@ rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://www.kommersant.ru/RSS/news.xml':'Коммерсант',
         'http://lenta.ru/rss':'Лента.ру',
         'http://www.mignews.com/export/mig_export3.html':'МигНьюс',
-        'http://www.blackseanews.net/allnews/romania.rss':'BlackSeaNews',
-        'http://www.blackseanews.net/allnews/bulgaria.rss':'BlackSeaNews',
-        'http://www.blackseanews.net/allnews/turkey.rss':'BlackSeaNews',
         'http://www.blackseanews.net/allnews/georgia.rss':'BlackSeaNews',
         'http://feeds.feedburner.com/rosbalt?format=xml':'Росбалт',
         'http://www.trend.az/feeds/index.rss':'Тренд',
@@ -92,9 +96,9 @@ rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kav
                  'ИРНА':'irna','RussiaToday':'rustoday','Апсны-Пресс':'apsnypress','САНА':'sana','РИА Новости':'rianovosti',
                  'ДАН':'dan'}
 
-stop_words = ['бокс[её]р','хоккеист','бессмертн','зв[её]здны[а-я] войн','\\bвойнов','\\bпутин',
+stop_words = ['бокс[её]р','хоккеист','Бессмертн','зв[её]здны[а-я]{,2} войн','\\bВойнов','\\bПутин',
               'велик[а-я]{2} отечествен','втор[а-я]{2} миров','Война и мир','Лавров','Песков','Захарова','МО РФ:',
-              'Минобороны РФ:']
+              'Минобороны РФ:','МИД РФ']
 
 country_filter = collections.OrderedDict([
     (('азербайдж','Баку(?!\s*\-\s*АПА\.)','карабах','армян','ереван','Армени','бакинск','нахчыван','Агдаш','\\bНардаран'),'Азербайджан'),

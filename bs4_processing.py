@@ -184,7 +184,7 @@ class NEWSAGENCY():
 if __name__ == '__main__':
     import requests
     html_code = requests.get("http://www.rbc.ua/rus/news/lysenko-sily-ato-nahodyatsya-polnoy-gotovnosti-1451472857.html")
-    # html_code.encoding = 'utf8'
+    # html_code.encoding = 'cp1251'
     plain_text = html_code.text
     obj = NEWSAGENCY(plain_text)
     obj.rbc_ukr()

@@ -5,7 +5,7 @@ from datetime import datetime, date
 import time
 import os
 import sqlite3
-from config import output_folder, os_current, text_size_limit, db_file, logger_bucket, logger
+from config import output_folder, os_current, text_size_limit, db_file, logger_bucket, logger, logger_history
 try:
     import win32com.client
     from win32com.gen_py import *
@@ -70,7 +70,7 @@ def output_to_sql(title_a, mtext_a, dtformat, rss_a, country):
         logger.warning(str(e))
 
 
-def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
+def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country, link):
     # if output.country == 'Украина' and (rss_a == 'УНИАН' or rss_a == 'Корреспондент' or
     #                                     rss_a == 'РБК-Украина' or rss_a == 'Укринформ' or
     #                                     rss_a == 'BlackSeaNews'):
@@ -81,6 +81,7 @@ def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country):
 
     if len(maintext_a) > text_size_limit:
         logger_bucket.warning(title_a + " - СЛИШКОМ БОЛЬШОЙ ТЕКСТ")
+        logger_history.warning(link)
         return False
     if os_current == 'Windows':
         if not os.path.exists(output_folder):
