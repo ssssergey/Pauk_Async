@@ -29,8 +29,8 @@ class RssDownloader:
 				try:
 					self.time_handler(entry.published_parsed)
 				except KeyError:
-					logger.warning("{}: FAILED!!!".format(entry.link))
-					print("{}: FAILED!!!".format(entry.link))
+					logger.warning("{}: FAILED TimeHandler!!!".format(entry.link))
+					print("{}: FAILED TimeHandler!!!".format(entry.link))
 					continue
 				if self.add_to_selected_or_not(entry):
 					print(entry.title)
@@ -97,7 +97,7 @@ def keywords_extract():
 
 def is_in_history(link):
 	if not os.path.isfile(history_file): create_history_file() # если файла нет, добавляем его и вписываем лимит-счетчик
-	with open(history_file, 'r') as history_txt: # открываем файл с уникальными url
+	with open(history_file, 'r', encoding='utf8') as history_txt: # открываем файл с уникальными url
 		history_txt.seek(0)                     # переводим курсор в начало файла
 		history_list = history_txt.readlines()  # копируем оттуда весь текст
 	if any(link in line for line in history_list):  #преверяем наличие текущей статьи в файле history.txt. Если есть то пропускаем.
@@ -110,5 +110,5 @@ def is_in_history(link):
 	return False
 
 def create_history_file():
-	with open(history_file, 'w+') as history_txt:
+	with open(history_file, 'w+', encoding='utf8') as history_txt:
 		history_txt.write('0b1100100\n')
