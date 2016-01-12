@@ -56,7 +56,7 @@ class Async():
     def download_HTMLs_to_HTMLlist(self,link,title,rss,func,atime):
         print('Start downloading {}'.format(link))
         logger.info('Start downloading {}'.format(link))
-        response = yield from aiohttp.request('GET', link)  # With timeout
+        response = yield from asyncio.wait_for(aiohttp.request('GET', link), 20)  # With timeout
         body = yield from response.read()
         try:
             if rss in ['News-Asia', 'МигНьюс', 'Коммерсант', 'Грузия-онлайн', 'ЦАМТО']:

@@ -31,6 +31,8 @@ class NEWSAGENCY():
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def rbc_ukr(self):
         self.main_text_class = ''
+        for script in self.soup.findAll('div',{'class':'editorschoice hidemobile'}):   # Delete all js scripts from soup
+            script.decompose()
         for everyitem in self.soup.find('div',{'class':'text'}).findAll('p',recursive=False):
             if "Читайте также:" not in everyitem.text:
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
@@ -183,7 +185,7 @@ class NEWSAGENCY():
 
 if __name__ == '__main__':
     import requests
-    html_code = requests.get("http://www.rbc.ua/rus/news/lysenko-sily-ato-nahodyatsya-polnoy-gotovnosti-1451472857.html")
+    html_code = requests.get("http://www.rbc.ua/rus/news/vzryv-stambule-pogibli-10-raneny-15-chelovek-1452591991.html")
     # html_code.encoding = 'cp1251'
     plain_text = html_code.text
     obj = NEWSAGENCY(plain_text)
