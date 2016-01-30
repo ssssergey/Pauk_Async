@@ -27,7 +27,7 @@ def get_rss_data():
         left_list = '\n'.join([str(len(rss_title_list)-i) + ". " + item for i,item in enumerate(rss_title_list)])
         left_list = '|--ОСТАЛОСЬ СКАЧАТЬ RSS--|\n' + left_list
         app.label_status.configure(text=left_list, bg='#69969C')
-        root.update()
+        app.label_status.update()
         rssdownloader = rss_downloader.RssDownloader(rss_url)
         if rssdownloader.start():
             rss_title_list.remove(rss_dict[rss_url])
@@ -201,21 +201,50 @@ def main():
     app.label_status.configure(text=summary_text, bg=color, justify=LEFT)
     app.label_status.update()
 
+from threading import Thread
+import time
+
 class GUI():
     def __init__(self, root):
         root.title("ПАУК " + version)
         root.iconbitmap(icon_file)
         # All Frames
-        self.button_start = tk.Button(root, text="ПУСК", font=("Arial 15 bold"), bg='#012E34', fg='white',
+        frame1 = tk.Frame(root, bg='#69969C')
+        frame1.pack(fill=X)
+        frame2 = tk.Frame(root, bg='#69969C')
+        frame2.pack(fill=X)
+        self.button_start = tk.Button(frame1, text="ПУСК", font=("Arial 15 bold"), bg='#012E34', fg='white',
                                       command=main)
         self.button_start.pack(fill=X)
-        self.label_status = tk.Label(root, text="Нажмите ПУСК", justify=LEFT, font=("Arial 12"), bg='#69969C')
+        # self.canvas = tk.Canvas(root)
+        # self.canvas.pack(expand = YES, fill = BOTH)
+        self.gif1 = tk.PhotoImage(file = 'spider_move.gif', format="gif -index 1")
+        self.Artwork = Label(frame1, image=self.gif1)
+        self.Artwork.photo = self.gif1
+        self.Artwork.pack()
+        # self.canvas.create_image(50, 10, image = gif1, anchor = NW)
+        self.label_status = tk.Label(frame2, text="Нажмите ПУСК", justify=LEFT, font=("Arial 12"), bg='#69969C')
         self.label_status.pack(fill=X)
         separator1 = tk.Frame(root, height=5, bg='#0E464E', bd=3)
         separator1.pack(fill=X)
         self.label_author = tk.Label(root, text='Версия: {} - 2016 г.\nРазработчик: Ли С.Е.'.format(version), bg='#69969C')
         self.label_author.pack(fill=X)
 
+        self.num = 0
+        Thread(target=self.animate).start()
+
+    def animate(self):
+        while True:
+            try:
+                time.sleep(0.04)
+                img = PhotoImage(file="spider_move.gif", format="gif -index {}".format(self.num))
+
+                self.Artwork.config(image=img)
+                self.Artwork.photo=img
+
+                self.num += 1
+            except:
+                self.num = 0
 
 if __name__ == "__main__":
     root = tk.Tk()

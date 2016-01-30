@@ -7,7 +7,7 @@ exe = Executable(
 	icon="Icon.ico"
 	 )
 
-includefiles=["keywords_militar.txt","setup\msvcr100.dll","Icon.ico"]
+includefiles=["keywords_militar.txt","setup\msvcr100.dll","Icon.ico","spider_move.gif"]
 includes=[]
 excludes=[]
 packages=[]
