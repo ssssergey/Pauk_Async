@@ -24,7 +24,7 @@ def get_rss_data():
     rss_downloader.url_selected = []
     rss_title_list = [rss_title for rss_title in rss_dict.values()]
     for rss_url in rss_dict:
-        left_list = '\n'.join([str(len(rss_title_list)-i) + ". " + item for i,item in enumerate(rss_title_list)])
+        left_list = '\n'.join([str(len(rss_title_list)-i) + ". " + item for i,item in enumerate(rss_title_list)][:12])
         left_list = '|--ОСТАЛОСЬ СКАЧАТЬ RSS--|\n' + left_list
         app.label_status.configure(text=left_list, bg='#69969C')
         app.label_status.update()
@@ -153,7 +153,7 @@ def main():
         app.label_status.configure(text="Обновите программу!\nwww.pauk-press.ru", bg='red')
         return
     app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
-    app.label_status.update()
+    root.update()
 
     start = datetime.now()                              # START TIME
     undownloaded_rss = get_rss_data()
@@ -213,22 +213,20 @@ class GUI():
         frame1.pack(fill=X)
         frame2 = tk.Frame(root, bg='#69969C')
         frame2.pack(fill=X)
-        self.button_start = tk.Button(frame1, text="ПУСК", font=("Arial 15 bold"), bg='#012E34', fg='white',
+        self.button_start = tk.Button(frame1, text="ПУСК", width=15, font=("Arial 15 bold"), bg='#012E34', fg='white',
                                       command=main)
-        self.button_start.pack(fill=X)
-        # self.canvas = tk.Canvas(root)
-        # self.canvas.pack(expand = YES, fill = BOTH)
+        self.button_start.pack(pady=5)
         self.gif1 = tk.PhotoImage(file = 'spider_move.gif', format="gif -index 1")
         self.Artwork = Label(frame1, image=self.gif1)
         self.Artwork.photo = self.gif1
-        self.Artwork.pack()
+        self.Artwork.pack(padx=1)
         # self.canvas.create_image(50, 10, image = gif1, anchor = NW)
         self.label_status = tk.Label(frame2, text="Нажмите ПУСК", justify=LEFT, font=("Arial 12"), bg='#69969C')
         self.label_status.pack(fill=X)
         separator1 = tk.Frame(root, height=5, bg='#0E464E', bd=3)
         separator1.pack(fill=X)
         self.label_author = tk.Label(root, text='Версия: {} - 2016 г.\nРазработчик: Ли С.Е.'.format(version), bg='#69969C')
-        self.label_author.pack(fill=X)
+        self.label_author.pack(fill=X, side=BOTTOM)
 
         self.num = 0
         Thread(target=self.animate).start()
@@ -248,5 +246,7 @@ class GUI():
 
 if __name__ == "__main__":
     root = tk.Tk()
+    root.geometry('+1+10')
+    root.configure(background='#69969C')
     app = GUI(root)
     root.mainloop()

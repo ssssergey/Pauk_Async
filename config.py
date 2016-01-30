@@ -30,7 +30,7 @@ text_size_limit = 5000
 
 expire_date = date(2016,4,1) # Date of the program license expiration
 
-version = '3.4'
+version = '3.5'
 
 import logging
 if os_current == 'Linux':
