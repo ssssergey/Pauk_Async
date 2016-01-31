@@ -153,8 +153,8 @@ def main():
         app.label_status.configure(text="Обновите программу!\nwww.pauk-press.ru", bg='red')
         return
     app.label_status.configure(text='Начал скачивать RSS.\nОЖИДАЙТЕ...', bg='#69969C')
+    app.giffile = "spider_move2.gif"
     root.update()
-
     start = datetime.now()                              # START TIME
     undownloaded_rss = get_rss_data()
     total_count = len(rss_downloader.url_selected)
@@ -200,6 +200,7 @@ def main():
         summary_text += '\nНе получены новости от: \n{}'.format(failed_rss)
     app.label_status.configure(text=summary_text, bg=color, justify=LEFT)
     app.label_status.update()
+    app.giffile = "spider_move.gif"
 
 from threading import Thread
 import time
@@ -216,11 +217,11 @@ class GUI():
         self.button_start = tk.Button(frame1, text="ПУСК", width=15, font=("Arial 15 bold"), bg='#012E34', fg='white',
                                       command=main)
         self.button_start.pack(pady=5)
-        self.gif1 = tk.PhotoImage(file = 'spider_move.gif', format="gif -index 1")
-        self.Artwork = Label(frame1, image=self.gif1)
-        self.Artwork.photo = self.gif1
+        self.giffile = "spider_move.gif"
+        gif = tk.PhotoImage(file = self.giffile, format="gif -index 1")
+        self.Artwork = Label(frame1, height=200, width=300, image=gif)
+        self.Artwork.photo = gif
         self.Artwork.pack(padx=1)
-        # self.canvas.create_image(50, 10, image = gif1, anchor = NW)
         self.label_status = tk.Label(frame2, text="Нажмите ПУСК", justify=LEFT, font=("Arial 12"), bg='#69969C')
         self.label_status.pack(fill=X)
         separator1 = tk.Frame(root, height=5, bg='#0E464E', bd=3)
@@ -229,16 +230,17 @@ class GUI():
         self.label_author.pack(fill=X, side=BOTTOM)
 
         self.num = 0
+
         Thread(target=self.animate).start()
 
     def animate(self):
         while True:
             try:
                 time.sleep(0.04)
-                img = PhotoImage(file="spider_move.gif", format="gif -index {}".format(self.num))
+                gif = PhotoImage(file=self.giffile, format="gif -index {}".format(self.num))
 
-                self.Artwork.config(image=img)
-                self.Artwork.photo=img
+                self.Artwork.config(image=gif)
+                self.Artwork.photo=gif
 
                 self.num += 1
             except:
