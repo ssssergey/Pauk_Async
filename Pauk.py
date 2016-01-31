@@ -46,7 +46,8 @@ class Async():
             print("ROUND {}".format(i))
             if self.data_changable:
                 self.data_current = self.data_changable[:]
-                loop = asyncio.get_event_loop()
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
                 aw = asyncio.wait([self.download_HTMLs_to_HTMLlist(item[0],item[1],item[2],item[3],item[4])
                                    for item in self.data_current])
                 loop.run_until_complete(aw)
@@ -205,6 +206,9 @@ def main():
 from threading import Thread
 import time
 
+def main_threading():
+    Thread(target=main).start()
+
 class GUI():
     def __init__(self, root):
         root.title("ПАУК " + version)
@@ -215,7 +219,7 @@ class GUI():
         frame2 = tk.Frame(root, bg='#69969C')
         frame2.pack(fill=X)
         self.button_start = tk.Button(frame1, text="ПУСК", width=15, font=("Arial 15 bold"), bg='#012E34', fg='white',
-                                      command=main)
+                                      command=main_threading)
         self.button_start.pack(pady=5)
         self.giffile = "spider_move.gif"
         gif = tk.PhotoImage(file = self.giffile, format="gif -index 1")
@@ -236,7 +240,7 @@ class GUI():
     def animate(self):
         while True:
             try:
-                time.sleep(0.04)
+                time.sleep(0.1)
                 gif = PhotoImage(file=self.giffile, format="gif -index {}".format(self.num))
 
                 self.Artwork.config(image=gif)

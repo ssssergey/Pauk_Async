@@ -9,7 +9,8 @@ from config import output_folder, os_current, text_size_limit, db_file, logger_b
 try:
     import win32com.client
     from win32com.gen_py import *
-except:
+except Exception as e:
+    logger.warning(str(e))
     pass
 
 
@@ -92,6 +93,7 @@ def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country, link):
             else:
                 return False
         except Exception as e:
+            logger.warn(str(e))
             if output_to_txt(title_a, maintext_a, date_a, time_a, rss_a, country):
                 return True
             else:
