@@ -8,7 +8,7 @@ from config import logger
 class NEWSAGENCY():
     def __init__(self, html_script):
         self.main_text_class = ''
-        self.soup = BeautifulSoup(html_script)
+        self.soup = BeautifulSoup(html_script, "html.parser")
         for script in self.soup.findAll('script'):   # Delete all js scripts from soup
             script.decompose()
         for style in self.soup.findAll('style'):     # Delete all css styles from soup

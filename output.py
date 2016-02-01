@@ -6,12 +6,12 @@ import time
 import os
 import sqlite3
 from config import output_folder, os_current, text_size_limit, db_file, logger_bucket, logger, logger_history
-try:
-    import win32com.client
-    from win32com.gen_py import *
-except Exception as e:
-    logger.warning(str(e))
-    pass
+# try:
+#     import win32com.client
+#     from win32com.gen_py import *
+# except Exception as e:
+#     logger.warning(str(e))
+#     pass
 
 
 def output_to_txt(title_a, mtext_a, date_a, time_a, rss_a, country):
@@ -25,34 +25,34 @@ def output_to_txt(title_a, mtext_a, date_a, time_a, rss_a, country):
             logger.warning(str(e))
             print(str(e) + '\n')
 
-def output_to_word(title_a, mtext_a, date_a, time_a, rss_a, country):
-    wordapp = win32com.client.gencache.EnsureDispatch("Word.Application") # Create new Word Object
-    wordapp.Visible = 1 # Word Application should`t be visible
-    out_path = output_folder + country + ' ' + str(date.today()) + ".doc"
-    if not os.path.isfile(out_path):
-        worddoc = wordapp.Documents.Add() # Create new Document Object
-        time.sleep(0.3)
-        worddoc.SaveAs(out_path)
-    else:
-        worddoc = wordapp.Documents.Open(out_path) # Create new Document Object
-        time.sleep(0.2)
-    worddoc.Content.Font.Size = 14
-    worddoc.Content.Font.Name = "Times New Roman"
-    worddoc.Content.ParagraphFormat.FirstLineIndent = 35
-    worddoc.Paragraphs.LineSpacingRule = win32com.client.constants.wdLineSpaceSingle
-    worddoc.Paragraphs.SpaceBefore = 0
-    worddoc.Paragraphs.SpaceAfter = 0
-    wordapp.Selection.EndKey (win32com.client.constants.wdStory)
-    wordapp.Selection.ParagraphFormat.Alignment = win32com.client.constants.wdAlignParagraphRight
-    wordapp.Selection.TypeText('{} ({} ИА "{}")\n'.format(date_a,time_a,rss_a))
-    wordapp.Selection.ParagraphFormat.Alignment = win32com.client.constants.wdAlignParagraphJustify
-    wordapp.Selection.Font.Bold = True
-    wordapp.Selection.TypeText('{}\n'.format(title_a))
-    wordapp.Selection.Font.Bold = False
-    wordapp.Selection.TypeText('{}\n\n'.format(mtext_a))
-    worddoc.Save()
-    worddoc.Close()
-    return True
+# def output_to_word(title_a, mtext_a, date_a, time_a, rss_a, country):
+#     wordapp = win32com.client.gencache.EnsureDispatch("Word.Application") # Create new Word Object
+#     wordapp.Visible = 1 # Word Application should`t be visible
+#     out_path = output_folder + country + ' ' + str(date.today()) + ".doc"
+#     if not os.path.isfile(out_path):
+#         worddoc = wordapp.Documents.Add() # Create new Document Object
+#         time.sleep(0.3)
+#         worddoc.SaveAs(out_path)
+#     else:
+#         worddoc = wordapp.Documents.Open(out_path) # Create new Document Object
+#         time.sleep(0.2)
+#     worddoc.Content.Font.Size = 14
+#     worddoc.Content.Font.Name = "Times New Roman"
+#     worddoc.Content.ParagraphFormat.FirstLineIndent = 35
+#     worddoc.Paragraphs.LineSpacingRule = win32com.client.constants.wdLineSpaceSingle
+#     worddoc.Paragraphs.SpaceBefore = 0
+#     worddoc.Paragraphs.SpaceAfter = 0
+#     wordapp.Selection.EndKey (win32com.client.constants.wdStory)
+#     wordapp.Selection.ParagraphFormat.Alignment = win32com.client.constants.wdAlignParagraphRight
+#     wordapp.Selection.TypeText('{} ({} ИА "{}")\n'.format(date_a,time_a,rss_a))
+#     wordapp.Selection.ParagraphFormat.Alignment = win32com.client.constants.wdAlignParagraphJustify
+#     wordapp.Selection.Font.Bold = True
+#     wordapp.Selection.TypeText('{}\n'.format(title_a))
+#     wordapp.Selection.Font.Bold = False
+#     wordapp.Selection.TypeText('{}\n\n'.format(mtext_a))
+#     worddoc.Save()
+#     worddoc.Close()
+#     return True
     # wordapp.Quit()
 
 def output_to_sql(title_a, mtext_a, dtformat, rss_a, country):
@@ -87,17 +87,17 @@ def output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country, link):
     if os_current == 'Windows':
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-        try:
-            if output_to_word(title_a, maintext_a, date_a, time_a, rss_a, country):
-                return True
-            else:
-                return False
-        except Exception as e:
-            logger.warn(str(e))
-            if output_to_txt(title_a, maintext_a, date_a, time_a, rss_a, country):
-                return True
-            else:
-                return False
+        # try:
+        #     if output_to_word(title_a, maintext_a, date_a, time_a, rss_a, country):
+        #         return True
+        #     else:
+        #         return False
+        # except Exception as e:
+        #     logger.warn(str(e))
+        if output_to_txt(title_a, maintext_a, date_a, time_a, rss_a, country):
+            return True
+        else:
+            return False
     elif os_current == 'Linux':
         if country != 'Другие':
             if output_to_sql(title_a, maintext_a, dtformat, rss_a, country):

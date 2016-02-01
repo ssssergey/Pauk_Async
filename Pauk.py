@@ -10,13 +10,14 @@ import tkinter as tk
 from tkinter.filedialog import *
 import socket
 import re
+import os
 
 import rss_downloader
 import bs4_processing
 from output import output
 from config import logger, expire_date, version, icon_file, country_filter, output_folder, logger_history, rss_dict
+from api_interaction import Api_inter
 
-import os
 
 socket.setdefaulttimeout(10.0)
 
@@ -188,14 +189,14 @@ def main():
         summary_text += '\nОтобрано: {}'.format(total_count)
         summary_text += '\nCкачано: {}'.format(downloaded_count)
         summary_text += '\nИспользовано: {}'.format(recieved_count)
-        color = 'yellow'
+        summary_text += '\nЗатрачено времени: {}'.format(delta)
+        color = '#c1ffac'
     elif len(undownloaded_rss) > 20:
         summary_text = 'ПРОВЕРЬТЕ ИНТЕРНЕТ СОЕДИНЕНИЕ!!!'
-        color = 'red'
+        color = '#9c699c'
     else:
         summary_text = 'Статей, представляющих интерес, не отмечено.'
-        color = 'gray'
-    summary_text += '\nЗатрачено времени: {}'.format(delta)
+        color = '#e3ebe0'
     if undownloaded_rss and recieved_count:
         failed_rss = '\n'.join(undownloaded_rss)
         summary_text += '\nНе получены новости от: \n{}'.format(failed_rss)
@@ -207,6 +208,12 @@ from threading import Thread
 import time
 
 def main_threading():
+    try:
+        api = Api_inter()
+        api.start_main()
+    except Exception as e:
+        app.label_status.configure(text=str(e))
+        app.label_status.update()
     Thread(target=main).start()
 
 class GUI():
