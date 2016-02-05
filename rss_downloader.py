@@ -28,14 +28,14 @@ class RssDownloader:
 			for entry in rss_data.get('entries'):
 				try:
 					self.time_handler(entry.published_parsed)
-				except KeyError:
+				except Exception:
 					logger.warning("{}: FAILED TimeHandler!!!".format(entry.link))
 					print("{}: FAILED TimeHandler!!!".format(entry.link))
 					continue
 				if self.add_to_selected_or_not(entry):
 					print(entry.title)
 					print(entry.link)
-					print (entry.published_parsed)
+					# print (entry.published_parsed)
 					url_selected.append((entry.link,                        # link
 										entry.title,                        # title of article
 										self.rss_title,                     # IA title

@@ -181,13 +181,20 @@ class NEWSAGENCY():
         self.main_text_class = ''
         for everyitem in self.soup.find('div', {'class': 'entry'}).findAll('p'):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
-
+    def anadolu(self):
+        self.main_text_class = ''
+        for everyitem in self.soup.find('div', {'class': 'article-post-content'}).findAll('p'):
+            self.main_text_class = self.main_text_class + '\n' + everyitem.text
+    def armenpress(self):
+        self.main_text_class = ''
+        for everyitem in self.soup.find('span', {'itemprop': 'articleBody'}).findAll('p'):
+            self.main_text_class = self.main_text_class + '\n' + everyitem.text
 
 if __name__ == '__main__':
     import requests
-    html_code = requests.get("http://www.rbc.ua/rus/news/vzryv-stambule-pogibli-10-raneny-15-chelovek-1452591991.html")
+    html_code = requests.get("http://armenpress.am/rus/news/834126/glava-mid-rf-pribiyl-s-vizitom-v-oae.html")
     # html_code.encoding = 'cp1251'
     plain_text = html_code.text
     obj = NEWSAGENCY(plain_text)
-    obj.rbc_ukr()
+    obj.armenpress()
     print(obj.main_text_class)

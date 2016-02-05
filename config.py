@@ -86,6 +86,8 @@ rss_dict = {'http://www.vedomosti.ru/newsline/out/rss.xml':'Ведомости',
         'http://sana.sy/ru/?feed=rss2':'САНА',
         'http://ria.ru/export/rss2/world/index.xml':'РИА Новости',
         'http://dan-news.info/feed':'ДАН',
+        'http://aa.com.tr/ru/rss/default?cat=live':'Анадолу',
+        'http://armenpress.am/rus/rss/news/':'Арменпресс'
         }
 
 rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kavuzel', 'Тренд':'trend', 'ВПК':'vpk', 'News-Asia':'news_asia',
@@ -94,7 +96,7 @@ rss_func_dict = {'Лента.ру':'lenta', 'Кавказский узел':'kav
                  'Росбалт':'rosbalt', 'Би-Би-Си':'bbc', 'РБК-Украина':'rbc_ukr', 'Укринформ':'ukrinform', 'РИА-Новости':'rian',
                  'УНИАН':'unian', 'Корреспондент':'korrespondent','РБК':'rbc_rus','APA.AZ':'apa_az','Спутник':'newsgeorgia',
                  'ИРНА':'irna','RussiaToday':'rustoday','Апсны-Пресс':'apsnypress','САНА':'sana','РИА Новости':'rianovosti',
-                 'ДАН':'dan'}
+                 'ДАН':'dan','Анадолу':'anadolu','Арменпресс':'armenpress'}
 
 stop_words = ['бокс[её]р','хоккеист','Бессмертн','зв[её]здны[а-я]{,2} войн','\\bВойнов','\\bПутин',
               'велик[а-я]{2} отечествен','втор[а-я]{2} миров','Война и мир','Лавров','Песков','Захарова','МО РФ:',
