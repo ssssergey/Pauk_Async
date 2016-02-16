@@ -18,11 +18,11 @@ class Api_inter():
         r = urllib.request.urlopen('https://paukapi-1207.appspot.com/newuid')
         # r = urllib.request.urlopen('http://localhost:14081/newuid')
         self.hashed_uid = r.headers['uid']
-        with open('uid', 'w+', encoding='utf8') as uidfile:
+        with open('uid', 'w+', encoding='utf-8-sig') as uidfile:
             uidfile.write(self.hashed_uid)
 
     def uid_from_file(self):
-        with open('uid', 'r', encoding='utf8') as uidfile:
+        with open('uid', 'r', encoding='utf-8-sig') as uidfile:
             self.hashed_uid = uidfile.readline().strip()
             if not self.hashed_uid:
                 self.create_file()

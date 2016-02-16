@@ -8,7 +8,7 @@ from datetime import datetime, date, timedelta
 from config import logger, logger_history, logger_bucket, rss_dict, rss_func_dict, keyword_file, history_file, stop_words, os_current
 
 
-socket.setdefaulttimeout(8.0)
+socket.setdefaulttimeout(6.0)
 
 url_selected = []
 
@@ -90,14 +90,14 @@ class RssDownloader:
 
 
 def keywords_extract():
-	with open(keyword_file,'r',encoding='utf-8') as f:
+	with open(keyword_file,'r',encoding='utf-8-sig') as f:
 		lines = f.readlines()
-		lines = [l.strip() for l in lines]
+		lines = [l.strip() for l in lines[1:]]
 	return lines
 
 def is_in_history(link):
 	if not os.path.isfile(history_file): create_history_file() # если файла нет, добавляем его и вписываем лимит-счетчик
-	with open(history_file, 'r', encoding='utf8') as history_txt: # открываем файл с уникальными url
+	with open(history_file, 'r', encoding='utf-8-sig') as history_txt: # открываем файл с уникальными url
 		history_txt.seek(0)                     # переводим курсор в начало файла
 		history_list = history_txt.readlines()  # копируем оттуда весь текст
 	if any(link in line for line in history_list):  #преверяем наличие текущей статьи в файле history.txt. Если есть то пропускаем.
@@ -110,5 +110,5 @@ def is_in_history(link):
 	return False
 
 def create_history_file():
-	with open(history_file, 'w+', encoding='utf8') as history_txt:
+	with open(history_file, 'w+', encoding='utf-8-sig') as history_txt:
 		history_txt.write('0b1100100\n')

@@ -15,7 +15,7 @@ from config import output_folder, os_current, text_size_limit, db_file, logger_b
 
 
 def output_to_txt(title_a, mtext_a, date_a, time_a, rss_a, country):
-    with open(output_folder + country + ' ' + str(date.today()) + '.txt', 'a', encoding='utf-8') as text_file:
+    with open(output_folder + country + ' ' + str(date.today()) + '.txt', 'a', encoding='utf-8-sig') as text_file:
         try:
             text_file.write('{} ({} ИА "{}")\n'.format(date_a,time_a,rss_a))
             text_file.write('{}\n'.format(title_a))

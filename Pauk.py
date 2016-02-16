@@ -99,6 +99,7 @@ def bs4_and_output(art_list_downloaded):
         country = define_country_by_zagolovok(title_a)
         if country == "Другие":
             country = define_country_by_mtext(maintext_a)
+
         if output(title_a, maintext_a, dtformat, date_a, time_a, rss_a, country,link):
             count_recieved += 1
             logger_history.warning(link)
@@ -208,12 +209,12 @@ from threading import Thread
 import time
 
 def main_threading():
-    try:
-        api = Api_inter()
-        api.start_main()
-    except Exception as e:
-        app.label_status.configure(text=str(e))
-        app.label_status.update()
+    # try:
+    #     api = Api_inter()
+    #     api.start_main()
+    # except Exception as e:
+    #     app.label_status.configure(text=str(e))
+    #     app.label_status.update()
     Thread(target=main).start()
 
 class GUI():
