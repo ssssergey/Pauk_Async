@@ -129,7 +129,7 @@ class NEWSAGENCY():
         for everyitem in self.soup.findAll('a', {'target': '_blank'}):
             everyitem.replaceWith('')
         self.main_text_class = ''
-        for everyitem in self.soup.find('div', {'class': 'b-material-text__l'}).findAll('p'):
+        for everyitem in self.soup.find('div', {'class': 'b-material-text__l'}).findAll('p', recursive=False):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def rosbalt(self):
         self.main_text_class = ''
@@ -163,6 +163,8 @@ class NEWSAGENCY():
         self.main_text_class = self.main_text_class + '\n' + self.soup.find('h3', {'id': 'ctl00_ctl00_ContentPlaceHolder_ContentPlaceHolder_NewsContent1_H1'}).text
         self.main_text_class = self.main_text_class + '\n' + self.soup.find('p', {'id': 'ctl00_ctl00_ContentPlaceHolder_ContentPlaceHolder_NewsContent1_BodyLabel'}).text
     def rustoday(self):
+        for everyitem in self.soup.findAll('p', {'class': 'disclaimer'}):
+            everyitem.replaceWith('')
         self.main_text_class = ''
         for everyitem in self.soup.find('article', {'id': 'content'}).findAll('p'):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
@@ -192,9 +194,9 @@ class NEWSAGENCY():
 
 if __name__ == '__main__':
     import requests
-    html_code = requests.get("http://armenpress.am/rus/news/834126/glava-mid-rf-pribiyl-s-vizitom-v-oae.html")
+    html_code = requests.get("http://russian.rt.com/article/149346")
     # html_code.encoding = 'cp1251'
     plain_text = html_code.text
     obj = NEWSAGENCY(plain_text)
-    obj.armenpress()
+    obj.rustoday()
     print(obj.main_text_class)
