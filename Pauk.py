@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime, date
+import time
 import asyncio
 import aiohttp
 import shutil
@@ -11,6 +12,7 @@ from tkinter.filedialog import *
 import socket
 import re
 import os
+from urllib import error
 
 import rss_downloader
 import bs4_processing
@@ -18,20 +20,29 @@ from output import output
 from config import logger, expire_date, version, icon_file, country_filter, output_folder, logger_history, rss_dict
 from api_interaction import Api_inter
 
-
 socket.setdefaulttimeout(10.0)
 
 def get_rss_data():
     rss_downloader.url_selected = []
     rss_title_list = [rss_title for rss_title in rss_dict.values()]
     for rss_url in rss_dict:
+        attempt = 0
         left_list = '\n'.join([str(len(rss_title_list)-i) + ". " + item for i,item in enumerate(rss_title_list)][:12])
         left_list = '|--ОСТАЛОСЬ СКАЧАТЬ RSS--|\n' + left_list
         app.label_status.configure(text=left_list, bg='#69969C')
         app.label_status.update()
-        rssdownloader = rss_downloader.RssDownloader(rss_url)
-        if rssdownloader.start():
-            rss_title_list.remove(rss_dict[rss_url])
+        while attempt < 3:
+            try:
+                rssdownloader = rss_downloader.RssDownloader(rss_url)
+                result = rssdownloader.start()
+                if result:
+                    rss_title_list.remove(rss_dict[rss_url])
+                break
+            except (error.URLError, socket.timeout):
+                time.sleep(3)
+                attempt += 1
+    return rss_title_list
+
     return rss_title_list
 
 #-------------------Async-------------------------#
@@ -192,7 +203,7 @@ def main():
         summary_text += '\nИспользовано: {}'.format(recieved_count)
         summary_text += '\nЗатрачено времени: {}'.format(delta)
         color = '#c1ffac'
-    elif len(undownloaded_rss) > 20:
+    elif len(undownloaded_rss) > 25:
         summary_text = 'ПРОВЕРЬТЕ ИНТЕРНЕТ СОЕДИНЕНИЕ!!!'
         color = '#9c699c'
     else:

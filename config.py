@@ -30,7 +30,7 @@ with open(keyword_file,'r',encoding='utf-8-sig') as f:
 
 text_size_limit = 5000
 
-expire_date = date(2016,4,1) # Date of the program license expiration
+expire_date = date(2016,5,1) # Date of the program license expiration
 
 version = '3.6'
 

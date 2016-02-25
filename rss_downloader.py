@@ -1,5 +1,8 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import feedparser
+from urllib import request
 import socket
 import re
 import os
@@ -22,7 +25,11 @@ class RssDownloader:
 		print ("Starting: ", self.rss_title)
 		count = 0
 		logger.info("Starting: {}".format(self.rss_title))
-		rss_data = feedparser.parse(self.url)
+		opener = request.build_opener()
+		opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
+		req_uest = opener.open(self.url, timeout=5)
+		response = req_uest.read()
+		rss_data = feedparser.parse(response)
 		if len(rss_data['entries']):
 			logger.info("{}: TOTAL - {}".format(self.rss_title,len(rss_data['entries'])))
 			for entry in rss_data.get('entries'):

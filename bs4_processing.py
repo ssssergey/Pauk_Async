@@ -112,7 +112,7 @@ class NEWSAGENCY():
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def camto(self):
         if '401' in self.soup.html.head.title.text:
-            logger.warning('%%%%%Платная статья.\n')
+            # logger.warning('%%%%%Платная статья.\n')
             self.main_text_class = 'ПЛАТНАЯ СТАТЬЯ'
             self.vremya_class = 'Empty'
             return
@@ -155,8 +155,10 @@ class NEWSAGENCY():
         for everyitem in self.soup.find('div',{'class':'content'}).findAll('p'):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def newsgeorgia(self):
+        for everyitem in self.soup.findAll('div', {'class': 'b-inject'}):
+            everyitem.replaceWith('')
         self.main_text_class = ''
-        for everyitem in self.soup.find('div', {'class': 'b-article__text'}).findAll('p'):
+        for everyitem in self.soup.find('div', {'class': 'b-article__text'}).findAll('p', recursive=False):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def irna(self):
         self.main_text_class = ''
@@ -175,6 +177,8 @@ class NEWSAGENCY():
         for everyitem in self.soup.find('div', {'class': 'entry'}).findAll('p'):
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def rianovosti(self):
+        for everyitem in self.soup.findAll('div', {'class': 'inject_type2'}):
+            everyitem.replaceWith('')
         self.main_text_class = ''
         for everyitem in self.soup.find('div', {'id': 'article_full_text'}).findAll('p'):
             if "Читайте также:" not in everyitem.text:
@@ -194,9 +198,9 @@ class NEWSAGENCY():
 
 if __name__ == '__main__':
     import requests
-    html_code = requests.get("http://russian.rt.com/article/149346")
+    html_code = requests.get("http://ria.ru/world/20160220/1378032785.html")
     # html_code.encoding = 'cp1251'
     plain_text = html_code.text
     obj = NEWSAGENCY(plain_text)
-    obj.rustoday()
+    obj.rianovosti()
     print(obj.main_text_class)
