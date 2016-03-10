@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-# import requests
 import urllib.request
 import urllib.parse
 from bs4 import BeautifulSoup
@@ -11,20 +10,21 @@ class Api_inter():
     def __init__(self):
         self.hashed_uid = None
         self.payload = None
+        self.link = 'https://paukapi-1207.appspot.com'
+        # self.link = 'http://localhost:14081'
         if not os.path.isfile('uid'):
             self.create_file()
 
     def create_file(self):
-        r = urllib.request.urlopen('https://paukapi-1207.appspot.com/newuid')
-        # r = urllib.request.urlopen('http://localhost:14081/newuid')
+        r = urllib.request.urlopen(self.link+'/newuid')
         self.hashed_uid = r.headers['uid']
-        with open('uid', 'w+', encoding='utf-8-sig') as uidfile:
+        with open('uid', 'w', encoding='utf-8-sig') as uidfile:
             uidfile.write(self.hashed_uid)
 
     def uid_from_file(self):
         with open('uid', 'r', encoding='utf-8-sig') as uidfile:
             self.hashed_uid = uidfile.readline().strip()
-            if not self.hashed_uid:
+            if len(self.hashed_uid) < 3:
                 self.create_file()
 
     def start_main(self):
@@ -43,14 +43,9 @@ class Api_inter():
         data = urllib.parse.urlencode(self.payload)
         print(data)
         binary_data = data.encode("utf8")
-        req = urllib.request.Request("https://paukapi-1207.appspot.com/", binary_data)
-        # req = urllib.request.Request("http://localhost:14081/", binary_data)
+        req = urllib.request.Request(self.link, binary_data)
         r = urllib.request.urlopen(req)
-        # the_page = r.read()
-        # "http://localhost:14081/"
         print(r)
-
-
 
 if __name__ == '__main__':
     api = Api_inter()

@@ -21,7 +21,7 @@ class NEWSAGENCY():
 
     def unian(self):
         self.main_text_class = ''
-        for everyitem in self.soup.find('div', {'class': 'article_body'}).findAll('p',recursive=False):
+        for everyitem in self.soup.find('div', {'class': 'article_body'}).findAll(['p','h2'],recursive=False):
             if "Читайте также" not in everyitem.text:
                 self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def ukrinform(self):
@@ -53,6 +53,8 @@ class NEWSAGENCY():
             self.main_text_class = self.main_text_class + '\n' + everyitem.text
     def rian(self):
         for everyitem in self.soup.findAll('p', {'style': 'text-align: center;'}):
+            everyitem.replaceWith('')
+        for everyitem in self.soup.findAll('div', {'class': 'inject_type2'}):
             everyitem.replaceWith('')
         self.main_text_class = ''
         for everyitem in self.soup.find('div', {'itemprop': 'articleBody'}).findAll('p'):

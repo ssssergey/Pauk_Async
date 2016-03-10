@@ -24,20 +24,19 @@ class RssDownloader:
 		global url_selected
 		print ("Starting: ", self.rss_title)
 		count = 0
-		logger.info("Starting: {}".format(self.rss_title))
+		print("Starting: {}".format(self.rss_title))
 		opener = request.build_opener()
 		opener.addheaders = [('User-Agent', 'Mozilla/5.0')]
 		req_uest = opener.open(self.url, timeout=5)
 		response = req_uest.read()
 		rss_data = feedparser.parse(response)
 		if len(rss_data['entries']):
-			logger.info("{}: TOTAL - {}".format(self.rss_title,len(rss_data['entries'])))
+			print("{}: TOTAL - {}".format(self.rss_title,len(rss_data['entries'])))
 			for entry in rss_data.get('entries'):
 				try:
 					self.time_handler(entry.published_parsed)
 				except Exception:
 					logger.warning("{}: FAILED TimeHandler!!!".format(entry.link))
-					print("{}: FAILED TimeHandler!!!".format(entry.link))
 					continue
 				if self.add_to_selected_or_not(entry):
 					print(entry.title)
@@ -51,10 +50,10 @@ class RssDownloader:
 										 ))
 					count += 1
 			print ("Exiting: ", self.rss_title)
-			logger.info("{}: Selected - {}".format(self.rss_title, count))
+			print("{}: Selected - {}".format(self.rss_title, count))
 			return True
 		else:
-			logger.info("{}: FAILED!!!".format(self.rss_title))
+			logger.warning("{}: FAILED!!!".format(self.rss_title))
 			return False
 
 	def add_to_selected_or_not(self, rss_item):
@@ -68,9 +67,9 @@ class RssDownloader:
 		for word in keywords_text:  # перебираем ключевые слова
 			p = re.compile(word)
 			if p.search(rss_item.title.lower()) or p.search(rss_item.title):
-				for word1 in stop_words:
-					p1 = re.compile(word1)
-					if p1.search(rss_item.title.lower()) or p1.search(rss_item.title):
+				for stopword in stop_words:
+					stop_pattern = re.compile(stopword)
+					if stop_pattern.search(rss_item.title.lower()) or stop_pattern.search(rss_item.title):
 						logger_bucket.warning(rss_item.title)
 						logger_history.warning(rss_item.link)
 						return False
@@ -90,7 +89,7 @@ class RssDownloader:
 		self.entry_time = new_time
 
 	def time_filter(self):
-		if self.entry_time.day == date.today().day:
+		if self.entry_time.date() == date.today():
 			return True
 		else:
 			return False
@@ -119,3 +118,7 @@ def is_in_history(link):
 def create_history_file():
 	with open(history_file, 'w+', encoding='utf-8-sig') as history_txt:
 		history_txt.write('0b1100100\n')
+
+if __name__ == '__main__':
+	rssdownloader = RssDownloader('http://www.rosbalt.ru/feed/')
+	result = rssdownloader.start()

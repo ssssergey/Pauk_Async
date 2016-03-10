@@ -41,9 +41,11 @@ def get_rss_data():
             except (error.URLError, socket.timeout):
                 time.sleep(3)
                 attempt += 1
+            except Exception as e:
+                logger.warning(e)
+                break
     return rss_title_list
 
-    return rss_title_list
 
 #-------------------Async-------------------------#
 
@@ -197,7 +199,7 @@ def main():
 
     if recieved_count:
         otsechka()
-        summary_text = 'Готово! Забирайте папку!\nc:\\от Паука\\'
+        summary_text = 'Готово! Забирайте папку!\n'+output_folder
         summary_text += '\nОтобрано: {}'.format(total_count)
         summary_text += '\nCкачано: {}'.format(downloaded_count)
         summary_text += '\nИспользовано: {}'.format(recieved_count)
